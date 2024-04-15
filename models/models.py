@@ -1,17 +1,21 @@
 import datetime
-from typing import List
+from os import path
+from typing import List, Dict
 from sqlalchemy import Column, String, ForeignKey, DateTime
 from sqlalchemy import ForeignKey
-# from sqlalchemy.dialects.sqlite import
 from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.attributes import QueryableAttribute
+import json
 
 
 class Base(DeclarativeBase):
     pass
+
+
 
 
 class Company(Base):
@@ -35,6 +39,9 @@ class Certificate(Base):
     def __repr__(self) -> str:
         return f"Certificate(name={self.name!r}"
 
+    def as_dict(self)-> Dict:
+        return {}
+
 
 class URL(Base):
     __tablename__ = 'urls'
@@ -54,7 +61,7 @@ class Resource(Base):
     type: Mapped[str] = mapped_column(String())
     url_id: Mapped[str] = mapped_column(ForeignKey('urls.url'))
     url: Mapped[URL] = relationship(back_populates="resources")
-    certificate: Mapped["CompanyCertificate"] = relationship(back_populates="resource_id")
+    certificate: Mapped["CompanyCertificate"] = relationship(back_populates="resource")
     path_file: Mapped[str] = mapped_column(String())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -64,10 +71,10 @@ class Resource(Base):
 
 class CompanyCertificate(Base):
     __tablename__ = 'companycertificates'
-    company_id: Mapped[int] = mapped_column(primary_key=True)
-    companies: Mapped[Company] = relationship(back_populates="companycertificates")
-    certificate_id: Mapped[int] = mapped_column(primary_key=True)
-    certificate: Mapped[Certificate] = relationship(back_populates="companycertificates")
+    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'),primary_key=True)
+    company: Mapped["Company"] = relationship(back_populates="companycertificates")
+    certificate_id: Mapped[int] = mapped_column(ForeignKey('certificates.id'),primary_key=True)
+    certificate: Mapped["Certificate"] = relationship(back_populates="companycertificates")
     found_date = Column(DateTime(timezone=True), server_default=func.now(), primary_key=True)
     removed_date = Column(DateTime(timezone=True))
 
