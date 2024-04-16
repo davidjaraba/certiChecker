@@ -35,7 +35,7 @@ class Company(Base):
 class Certificate(Base):
     __tablename__ = 'certificates'
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
+    name: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
     companycertificates: Mapped[List["CompanyCertificate"]] = relationship(back_populates='certificate', cascade='all')
 
     def __repr__(self) -> str:
