@@ -1,7 +1,7 @@
 from app.api.dependencies.core import DBSessionDep
-from app.crud.certificate import get_certificate, get_certificates, create_certificate
-from app.schemas.certificate import CreateCertificateDto
-from fastapi import APIRouter
+from app.crud.certificate import get_certificate, get_certificates, create_certificate, delete_certificate
+from app.schemas.certificate import CreateCertificateDto, ResponseCertificateDto
+from fastapi import APIRouter, Response
 
 router = APIRouter(
     prefix="/api/certificates",
@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.get("/{cert_id}", response_model=CreateCertificateDto)
+@router.get("/{cert_id}", response_model=ResponseCertificateDto)
 async def get_cert_by_id(
         cert_id: int,
         db_session: DBSessionDep
@@ -19,15 +19,25 @@ async def get_cert_by_id(
     return user
 
 
-@router.get("/", response_model=list[CreateCertificateDto])
+@router.get("/", response_model=list[ResponseCertificateDto])
 async def get_all_cert(
         db_session: DBSessionDep
 ):
     return await get_certificates(db_session)
 
 
-@router.post("/", response_model=CreateCertificateDto, status_code=201)
+@router.post("/", response_model=ResponseCertificateDto, status_code=201)
 async def create_cert(create_certificate_dto: CreateCertificateDto,
                       db_session: DBSessionDep
-):
+                      ):
     return await create_certificate(db_session, create_certificate_dto)
+
+
+@router.delete("/{cert_id}", status_code=204)
+async def delete_cert(cert_id: int,
+                      db_session: DBSessionDep
+                      ):
+    await delete_certificate(db_session, cert_id)
+    return Response(status_code=204)
+
+
