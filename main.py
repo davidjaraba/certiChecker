@@ -6,8 +6,6 @@ from sqlalchemy.orm import Session
 from models.models import Base
 from models.models import Certificate
 
-import json
-
 app = FastAPI()
 
 ruta = "base.db"
@@ -35,8 +33,11 @@ async def list_certificates():
     stmt = select(Certificate)
     res = session.execute(stmt).fetchall()
 
-
-    json_response = jsonable_encoder(res)
+    if res is not None:
+        res = [row._asdict() for row in res]
+        json_response = jsonable_encoder(res)
+    else:
+        json_response = []
 
     return JSONResponse(content=json_response)
 
@@ -46,6 +47,10 @@ async def get_certificate(cert_id):
     stmt = select(Certificate).where(Certificate.id == cert_id)
     res = session.execute(stmt).fetchone()
 
-    json_response = jsonable_encoder(res[0])
+    if res is not None:
+        res = res._asdict()
+        json_response = jsonable_encoder(res)
+    else:
+        return JSONResponse(status_code=404, content={"message": "Certificate not found"})
 
     return JSONResponse(content=json_response)

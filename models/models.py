@@ -30,6 +30,8 @@ class Company(Base):
         return f"Company(id={self.id!r}, name={self.name!r}"
 
 
+
+
 class Certificate(Base):
     __tablename__ = 'certificates'
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -39,8 +41,6 @@ class Certificate(Base):
     def __repr__(self) -> str:
         return f"Certificate(name={self.name!r}"
 
-    def as_dict(self)-> Dict:
-        return {}
 
 
 class URL(Base):
