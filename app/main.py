@@ -62,6 +62,16 @@ if __name__ == "__main__":
     asyncio.run(async_main())
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)
 
+
+
+
+
+
+
+
+
+
+
 # from typing import Any, Annotated
 #
 # from fastapi import FastAPI, Request, Body
