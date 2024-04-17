@@ -16,20 +16,17 @@ class Base(DeclarativeBase):
     pass
 
 
-
-
 class Company(Base):
     __tablename__ = 'companies'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(30))
     urls: Mapped[List["URL"]] = relationship(back_populates='company', cascade='all, delete')
-    companycertificates: Mapped[List["CompanyCertificate"]] = relationship(back_populates='company', cascade='all, delete')
+    companycertificates: Mapped[List["CompanyCertificate"]] = relationship(back_populates='company',
+                                                                           cascade='all, delete')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self) -> str:
         return f"Company(id={self.id!r}, name={self.name!r}"
-
-
 
 
 class Certificate(Base):
@@ -40,7 +37,6 @@ class Certificate(Base):
 
     def __repr__(self) -> str:
         return f"Certificate(name={self.name!r}"
-
 
 
 class URL(Base):
@@ -71,9 +67,9 @@ class Resource(Base):
 
 class CompanyCertificate(Base):
     __tablename__ = 'companycertificates'
-    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'),primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'), primary_key=True)
     company: Mapped["Company"] = relationship(back_populates="companycertificates")
-    certificate_id: Mapped[int] = mapped_column(ForeignKey('certificates.id'),primary_key=True)
+    certificate_id: Mapped[int] = mapped_column(ForeignKey('certificates.id'), primary_key=True)
     certificate: Mapped["Certificate"] = relationship(back_populates="companycertificates")
     found_date = Column(DateTime(timezone=True), server_default=func.now(), primary_key=True)
     removed_date = Column(DateTime(timezone=True))

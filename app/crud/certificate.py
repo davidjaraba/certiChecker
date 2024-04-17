@@ -1,7 +1,7 @@
 from app.models.models import Certificate as CertificateDBModel
 from app.schemas.certificate import CreateCertificateDto, UpdateCertificateDto
 from fastapi import HTTPException
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -38,7 +38,6 @@ async def update_certificate(db_session: AsyncSession, cert_id: int, update_cert
     if not cert:
         raise HTTPException(status_code=404, detail="Certificate not found")
 
-
     for field, value in update_certificate:
         setattr(cert, field, value)
 
@@ -46,8 +45,6 @@ async def update_certificate(db_session: AsyncSession, cert_id: int, update_cert
     await db_session.refresh(cert)
 
     return cert
-
-
 
 
 async def delete_certificate(db_session: AsyncSession, cert_id: int):

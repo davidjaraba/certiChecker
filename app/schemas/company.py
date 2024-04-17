@@ -3,21 +3,23 @@ from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 
-class CreateCertificateDto(BaseModel):
+class CreateCompanyDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     name: str
 
 
-class ResponseCertificateDto(BaseModel):
+class ResponseCompanyDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
 
     name: str
 
+    created_at: str
 
-class UpdateCertificateDto(BaseModel):
+
+class UpdateCompanyDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     name: Optional[str] = None
