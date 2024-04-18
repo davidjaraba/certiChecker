@@ -12,38 +12,24 @@ from app.crud import certificate
 client = TestClient(router)
 
 
-def test_get_by_id():
-    mock_return_value = {"id": 10, "name": "asd"}  # Define the return value of the mock here
 
-    with patch('app.api.routers.certificates.get_certificate', return_value=mock_return_value) as mock_get_certificate:
-        response = client.get("http://localhost:8000/api/certificates/10")
-
-    mock_get_certificate.assert_called_once()  # Assert that the mock was called
-
-    assert response.status_code == 200
-    data = response.json()
-
-    assert len(data) > 0
-    assert data["name"] == "asd"
 
 class Tests(TestCase):
     def test_get_by_id(self):
-        with patch.object(certificate, 'get_certificate', return_value=[{
-            "name": "asd"
-        }]):
+        mock_return_value = {"id": 10, "name": "asd"}
+
+        with patch('app.api.routers.certificates.get_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
             response = client.get("http://localhost:8000/api/certificates/10")
+
+        mock_get_certificate.assert_called_once()
 
         assert response.status_code == 200
         data = response.json()
 
-        print(data)
-
         assert len(data) > 0
+        assert data["name"] == "asd"
 
-
-#
-# class TestCertificates(TestCase):
-#     # @patch("app.crud.certificate.get_certificate")
 
 
 # class TestCertificates(TestCase):
