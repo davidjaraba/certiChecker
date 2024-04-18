@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def get_certificate(db_session: AsyncSession, cert_id: int):
+
+    print("por algun motivo llega aqui")
     cert = (await db_session.scalars(select(CertificateDBModel).where(CertificateDBModel.id == cert_id))).first()
 
     if not cert:

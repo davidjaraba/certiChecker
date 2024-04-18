@@ -12,78 +12,34 @@ from app.crud import certificate
 client = TestClient(router)
 
 
-# @pytest.fixture
-# def mock_crud(mocker):
-#     mock = Mock()
-#     # mocker.patch('app.crud.certificate.get_certificate', return_value=mock)
-#     mock.get_certificate.return_value = """
-#         "name": "sadas"
-#     """
-#     return mock
-#
-# @pytest.fixture
-# def client():
-#     with certificate.test_client() as client:
-#         yield client
-#
+def test_get_by_id():
+    mock_return_value = {"id": 10, "name": "asd"}  # Define the return value of the mock here
 
-@pytest.mark.asyncio
-async def test_get_by_id():
-    # with patch.object(certificate, "get_certificate") as mock_obtener_datos: mock_obtener_datos.return_value = {
-    #     "name": "asdasd"
-    # }
+    with patch('app.api.routers.certificates.get_certificate', return_value=mock_return_value) as mock_get_certificate:
+        response = client.get("http://localhost:8000/api/certificates/10")
 
-    response = client.get(
-        "http://localhost:8000/api/certificates/10")
-
-    assert response.status_code == 2222
-    assert True == False
-
-
-class Tests(TestCase):
-    async def test_get_by_id(self):
-        with patch.object(certificate, "get_certificate") as mock_obtener_datos: mock_obtener_datos.return_value = {
-            "name": "asdasd"
-        }
-        response = client.get(
-            "http://localhost:8000/api/certificates/10")
-
-        assert response.status_code == 2222
-        assert True == False
-        # mock_res = [{
-        #     "name": "sdasdasda"
-        # }]
-        # with patch("app.crud.certificate.get_certificaste", new=MagicMock(return_value=mock_res)): response = client.get(
-        #     "http://localhost:8000/api/certificates/10")
-        #
-        # print(response)
-        #
-        # assert response.status_code == "cxczxc204"
-        # data = response.json()
-        #
-        # assert len(data) > 0
-
-
-def test_get_by_id_success():
-    # response = requests.get("http://localhost:8000/api/certificates/10")
-    # mocker.patch.object(certificate, "get_certificate", return_value="""
-    #     "name": "asda"
-    # """)
-
-    with patch.object(certificate, 'get_certificate', return_value=[{
-        "name": "asd"
-    }]): response = client.get("http://localhost:8000/api/certificates/10")
-
-    # mock_get_cert_by_id.return_value = """
-    #     "name": "asdasdsa"
-    # """
+    mock_get_certificate.assert_called_once()  # Assert that the mock was called
 
     assert response.status_code == 200
     data = response.json()
 
-    print(data)
-
     assert len(data) > 0
+    assert data["name"] == "asd"
+
+class Tests(TestCase):
+    def test_get_by_id(self):
+        with patch.object(certificate, 'get_certificate', return_value=[{
+            "name": "asd"
+        }]):
+            response = client.get("http://localhost:8000/api/certificates/10")
+
+        assert response.status_code == 200
+        data = response.json()
+
+        print(data)
+
+        assert len(data) > 0
+
 
 #
 # class TestCertificates(TestCase):
