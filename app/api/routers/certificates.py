@@ -15,8 +15,8 @@ async def get_cert_by_id(
         cert_id: int,
         db_session: DBSessionDep
 ):
-    user = await get_certificate(db_session, cert_id)
-    return user
+    cert = await get_certificate(db_session, cert_id)
+    return cert
 
 
 @router.get("/", response_model=list[ResponseCertificateDto])
