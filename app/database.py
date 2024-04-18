@@ -12,8 +12,6 @@ from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
-# Heavily inspired by https://praciano.com.br/fastapi-and-async-sqlalchemy-20-with-pytest-done-right.html
-
 
 class DatabaseSessionManager:
     def __init__(self, host: str, engine_kwargs: dict[str, Any] = {}):
