@@ -5,9 +5,11 @@ import requests
 # from app.crud.certificate import get_certificate
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from fastapi import HTTPException
+from fastapi import Response
+from fastapi.exceptions import RequestValidationError
 
 from app.api.routers.certificates import router
+from app.crud.certificate import get_certificate
 
 from fastapi.testclient import TestClient
 from app.crud import certificate
@@ -32,16 +34,15 @@ class Tests(TestCase):
         assert data["name"] == "asd"
 
     def test_get_by_id_not_found(self):
-        with patch('app.api.routers.certificates.get_certificate',
-                   side_effect=HTTPException(status_code=404, detail="Certificate not found")) as mock_get_certificate:
-            try:
-                response = client.get("http://localhost:8000/api/certificates/10")
-            except HTTPException as e:
-                assert e.status_code == 404
-                assert str(e.detail) == "Certificate not found"
-            else:
-                assert False, "Expected HTTPException was not raised"
+        mock_return_value = Response(status_code=404)
 
+        with patch('app.api.routers.certificates.get_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            response = client.get("http://localhost:8000/api/certificates/10")
+
+        mock_get_certificate.assert_called_once()
+
+        assert response.status_code == 404
 
     def test_get_all(self):
         mock_return_value = [{"id": 10, "name": "asd"}, {"id": 11, "name": "222"}]
@@ -54,45 +55,110 @@ class Tests(TestCase):
 
         assert len(response.json()) == 2
 
+    def test_create(self):
+        mock_return_value = {"id": 10, "name": "PRUEBA"}
 
+        with patch('app.api.routers.certificates.create_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            response = client.post("http://localhost:8000/api/certificates/",
+                                   json={"name": "PRUEBA"}
+                                   )
 
+        mock_get_certificate.assert_called_once()
 
-# class TestCertificates(TestCase):
+        assert response.status_code == 201
+        data = response.json()
 
-# def make_request(path: str):
-#     base_url = "http://localhost:8000/api"
-#     response = requests.get(f'{base_url + path}')
-#     return response
-#
-# def make_post(path: str, body):
-#     base_url = "http://localhost:8000/api"
-#     response = requests.post(f'{base_url + path}', json=body)
-#     return response
+        assert len(data) > 0
+        assert data["name"] == "PRUEBA"
 
+    def test_create_conflict(self):
+        mock_return_value = Response(status_code=409)
 
-# def test_get_by_id_not_found(self):
-#     response = make_request("/certificates/-1")
-#
-#     assert response.status_code == 404
-#
-# def test_get_by_id_error():
-#     response = make_request("/certificates/asdasdasd")
-#
-#     assert response.status_code == 422
-#
-# def test_create():
-#     body = {'name': "prueba"}
-#     response = make_post("/certificates", body)
-#     assert response.status_code == 201
-#     assert response.json()["name"] == "prueba"
-#
-# def test_create_error_badrequest():
-#     body = {'namjhjje': "prueba"}
-#     response = make_post("/certificates", body)
-#     assert response.status_code == 400
-#
-# def test_create_error_confict():
-#     body = {'name': "prueba"}
-#     make_post("/certificates", body)
-#     response = make_post("/certificates", body)
-#     assert response.status_code == 409
+        with patch('app.api.routers.certificates.create_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            response = client.post("http://localhost:8000/api/certificates/",
+                                   json={"name": "PRUEBA"}
+                                   )
+
+        mock_get_certificate.assert_called_once()
+
+        assert response.status_code == 409
+
+    def test_create_with_errors(self):
+        mock_return_value = {"name": "PRUEBA"}
+
+        with patch('app.api.routers.certificates.create_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            try:
+                response = client.post("http://localhost:8000/api/certificates/",
+                                       json={"namee": "PRUEBA"}
+                                       )
+            except RequestValidationError as e:
+                assert True
+            else:
+                assert False
+
+    def test_update(self):
+        mock_return_value = {"id": 10, "name": "PRUEBA"}
+
+        with patch('app.api.routers.certificates.update_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            response = client.put("http://localhost:8000/api/certificates/2",
+                                  json={"name": "PRUEBA"}
+                                  )
+
+        mock_get_certificate.assert_called_once()
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert len(data) > 0
+        assert data["name"] == "PRUEBA"
+
+    def test_update_conflict(self):
+        mock_return_value = Response(status_code=409)
+
+        with patch('app.api.routers.certificates.update_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            response = client.put("http://localhost:8000/api/certificates/2",
+                                  json={"name": "PRUEBA"}
+                                  )
+
+        mock_get_certificate.assert_called_once()
+
+        assert response.status_code == 409
+
+    def test_update_with_errors(self):
+        mock_return_value = {"name": "PRUEBA"}
+
+        with patch('app.api.routers.certificates.update_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            try:
+                response = client.put("http://localhost:8000/api/certificates/2",
+                                      json={"namee": "PRUEBA"}
+                                      )
+            except RequestValidationError as e:
+                assert True
+            else:
+                assert False
+
+    def test_delete(self):
+        mock_return_value = Response(status_code=204)
+        with patch('app.api.routers.certificates.delete_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            response = client.delete("http://localhost:8000/api/certificates/2")
+
+        mock_get_certificate.assert_called_once()
+
+        assert response.status_code == 204
+
+    def test_delete_not_found(self):
+        mock_return_value = Response(status_code=404)
+        with patch('app.api.routers.certificates.delete_certificate',
+                   return_value=mock_return_value) as mock_get_certificate:
+            response = client.delete("http://localhost:8000/api/certificates/2")
+
+        mock_get_certificate.assert_called_once()
+
+        assert response.status_code == 404
