@@ -3,7 +3,7 @@ from unittest import TestCase
 import pytest
 import requests
 # from app.crud.certificate import get_certificate
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 
 from fastapi import HTTPException
 
@@ -34,11 +34,14 @@ class Tests(TestCase):
     def test_get_by_id_not_found(self):
         with patch('app.api.routers.certificates.get_certificate',
                    side_effect=HTTPException(status_code=404, detail="Certificate not found")) as mock_get_certificate:
-            response = client.get("http://localhost:8000/api/certificates/10")
+            try:
+                response = client.get("http://localhost:8000/api/certificates/10")
+            except HTTPException as e:
+                assert e.status_code == 404
+                assert str(e.detail) == "Certificate not found"
+            else:
+                assert False, "Expected HTTPException was not raised"
 
-        self.assertRaises(HTTPException)
-
-        assert response.status_code == 404
 
     def test_get_all(self):
         mock_return_value = [{"id": 10, "name": "asd"}, {"id": 11, "name": "222"}]
