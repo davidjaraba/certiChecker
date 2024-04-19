@@ -4,14 +4,15 @@ import pytest
 import requests
 # from app.crud.certificate import get_certificate
 from unittest.mock import patch, MagicMock
+
+from fastapi import HTTPException
+
 from app.api.routers.certificates import router
 
 from fastapi.testclient import TestClient
 from app.crud import certificate
 
 client = TestClient(router)
-
-
 
 
 class Tests(TestCase):
@@ -29,6 +30,27 @@ class Tests(TestCase):
 
         assert len(data) > 0
         assert data["name"] == "asd"
+
+    def test_get_by_id_not_found(self):
+        with patch('app.api.routers.certificates.get_certificate',
+                   side_effect=HTTPException(status_code=404, detail="Certificate not found")) as mock_get_certificate:
+            response = client.get("http://localhost:8000/api/certificates/10")
+
+        self.assertRaises(HTTPException)
+
+        assert response.status_code == 404
+
+    def test_get_all(self):
+        mock_return_value = [{"id": 10, "name": "asd"}, {"id": 11, "name": "222"}]
+
+        with patch('app.api.routers.certificates.get_certificates',
+                   return_value=mock_return_value) as mock_get_certificates:
+            response = client.get("http://localhost:8000/api/certificates/")
+
+        assert response.status_code == 200
+
+        assert len(response.json()) == 2
+
 
 
 
