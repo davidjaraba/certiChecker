@@ -22,4 +22,4 @@ class ResponseCompanyDto(BaseModel):
 class UpdateCompanyDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    name: Optional[str] = None
+    name: Optional[str]
