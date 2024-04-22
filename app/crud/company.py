@@ -39,7 +39,8 @@ async def update_company(db_session: AsyncSession, cert_id: int, update_company:
         return Response(status_code=404, content="Company not found")
 
     for field, value in update_company:
-        setattr(cert, field, value)
+        if value:
+            setattr(cert, field, value)
 
     await db_session.commit()
     await db_session.refresh(cert)

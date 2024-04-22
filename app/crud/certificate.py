@@ -45,7 +45,8 @@ async def update_certificate(db_session: AsyncSession, cert_id: int, update_cert
         return Response(status_code=404, content="Certificate not found")
 
     for field, value in update_certificate:
-        setattr(cert, field, value)
+        if value:
+            setattr(cert, field, value)
 
 
     await db_session.commit()

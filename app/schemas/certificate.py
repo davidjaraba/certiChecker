@@ -20,4 +20,4 @@ class ResponseCertificateDto(BaseModel):
 class UpdateCertificateDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    name: Optional[str]
+    name: Optional[str] = None

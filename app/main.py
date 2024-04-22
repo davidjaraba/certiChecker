@@ -9,6 +9,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.api.routers.certificates import router as certificates_router
 from app.api.routers.companies import router as companies_router
+from app.api.routers.urls import router as urls_router
+from app.api.routers.resources import router as resources_router
+
 # from app.config import settings
 from database import sessionmanager
 from models.models import Base
@@ -43,7 +46,8 @@ async def root():
 # Routers
 app.include_router(certificates_router)
 app.include_router(companies_router)
-
+app.include_router(urls_router)
+app.include_router(resources_router)
 
 # async def init_models():
 #     async with sessionmanager._engine.begin() as conn:

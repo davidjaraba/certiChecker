@@ -3,23 +3,27 @@ from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 
-class CreateCompanyDto(BaseModel):
+class CreateURLDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    name: str
+    url: str
+
+    company_id: int
 
 
-class ResponseCompanyDto(BaseModel):
+class ResponseURLDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    url: str
 
-    name: str
+    company_id: int
+
+    company_name: str
 
     created_at: str
 
 
-class UpdateCompanyDto(BaseModel):
+class UpdateURLDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    name: Optional[str] = None
+    company_id: Optional[int] = None
