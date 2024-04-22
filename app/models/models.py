@@ -19,7 +19,7 @@ class Base(DeclarativeBase):
 class Company(Base):
     __tablename__ = 'companies'
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
+    name: Mapped[str] = mapped_column(String(30), nullable=False)
     urls: Mapped[List["URL"]] = relationship(back_populates='company', cascade='all, delete')
     companycertificates: Mapped[List["CompanyCertificate"]] = relationship(back_populates='company',
                                                                            cascade='all, delete')
@@ -42,7 +42,7 @@ class Certificate(Base):
 class URL(Base):
     __tablename__ = 'urls'
     url: Mapped[str] = mapped_column(primary_key=True)
-    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'))
+    company_id: Mapped[int] = mapped_column(ForeignKey('companies.id'), nullable=False)
     company: Mapped["Company"] = relationship(back_populates="urls")
     resources: Mapped[List["Resource"]] = relationship(back_populates='url', cascade='all, delete')
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -54,11 +54,11 @@ class URL(Base):
 class Resource(Base):
     __tablename__ = 'resources'
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    type: Mapped[str] = mapped_column(String())
-    url_id: Mapped[str] = mapped_column(ForeignKey('urls.url'))
+    type: Mapped[str] = mapped_column(String(), nullable=False)
+    url_id: Mapped[str] = mapped_column(ForeignKey('urls.url'), nullable=False)
     url: Mapped[URL] = relationship(back_populates="resources")
     certificate: Mapped["CompanyCertificate"] = relationship(back_populates="resource")
-    path_file: Mapped[str] = mapped_column(String())
+    path_file: Mapped[str] = mapped_column(String(), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self) -> str:
