@@ -49,12 +49,7 @@ app.include_router(companies_router)
 app.include_router(urls_router)
 app.include_router(resources_router)
 
-# async def init_models():
-#     async with sessionmanager._engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.drop_all)
-#         await conn.run_sync(Base.metadata.create_all)
-#
-# engine = create_async_engine('sqlite+aiosqlite:///base.db', echo=True)
+
 async def async_main() -> None:
     print("Creando tablas...")
     async with sessionmanager._engine.begin() as conn:
