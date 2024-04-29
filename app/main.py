@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import ssl
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -11,6 +12,10 @@ from app.api.routers.certificates import router as certificates_router
 from app.api.routers.companies import router as companies_router
 from app.api.routers.urls import router as urls_router
 from app.api.routers.resources import router as resources_router
+
+from home import Home
+
+from fastapi.middleware.cors import CORSMiddleware
 
 # from app.config import settings
 from database import sessionmanager
@@ -37,6 +42,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="ssss", docs_url="/api/docs", debug=True)
 
+# CORS Allow all
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 async def root():
@@ -56,22 +70,12 @@ async def async_main() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
-
-
 if __name__ == "__main__":
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ssl_context.load_cert_chain('./cert/cert.pem', keyfile='./cert/key.pem')
     print("Inicializando API REST")
     asyncio.run(async_main())
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)
-
-
-
-
-
-
-
-
-
-
 
 # from typing import Any, Annotated
 #

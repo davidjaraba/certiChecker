@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>React Local</title>
+  <script type="application/javascript" src="https://unpkg.com/react@16.0.0/umd/react.production.min.js"></script>
+  <script type="application/javascript" src="https://unpkg.com/react-dom@16.0.0/umd/react-dom.production.min.js"></script>
+  <script type="application/javascript" src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+
+<script type="text/babel">
+// Obtain the root
+    const rootElement = document.getElementById('root')
+// Create a ES6 class component
+    class Table extends React.Component {
+// Use the render function to return JSX component
+
+    render() {
+      const props = {
+      headers: ['id', 'name'],
+      data: []}
+
+      const res = fetch('http://79.117.12.111:8000/api/certificates/')
+        .then(response => response.json())
+        .then(json => {
+          props.data = json
+        })
+
+        return (
+                <div className="shopping-list">
+                  <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                      <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                      <tr>
+                        {props.headers.map((header) => {
+                          return (
+                                  <th scope="col" className="px-6 py-3">
+                                    {header.toUpperCase()}
+                                  </th>
+                          );
+                        })}
+                        <th scope="col" className="px-6 py-3"></th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {props.data.map((d) => {
+                        return (
+                                <tr className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                                  {props.headers.map((r) => {
+                                    return <td className="px-6 py-4">{d[r]}</td>;
+                                  })}
+                                  <td className="px-6 py-4">
+                                    <a
+                                            href="#"
+                                            className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                    >
+                                      Edit
+                                    </a>
+                                  </td>
+                                </tr>
+                        );
+                      })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+        );
+    }
+    }
+
+// Create a function to wrap up your component
+function App() {
+  return (
+          <div>
+            <Table name="@luispagarcia on Dev.to!"/>
+          </div>
+  )
+}
+
+
+// Use the ReactDOM.render to show your component on the browser
+ReactDOM.render(
+        <App/>,
+        rootElement
+)
+</script>
+
+</body>
+
+</html>
