@@ -14,6 +14,17 @@ async def get_url(db_session: AsyncSession, url_name: str):
     return cert
 
 
+async def get_urls_by_company_id(db_session: AsyncSession, company_id: int):
+    result = await db_session.scalars(
+        select(URLDBModel).where(URLDBModel.company_id == company_id)
+    )
+    urls = result.fetchall()
+    if not urls:
+        return []
+    return urls
+
+
+
 async def get_urls(db_session: AsyncSession):
     return (await db_session.scalars(select(URLDBModel))).fetchall()
 

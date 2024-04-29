@@ -1,7 +1,9 @@
+from typing import Optional
+
 from app.api.dependencies.core import DBSessionDep
-from app.crud.url import get_url, get_urls, create_url, update_url, delete_url
+from app.crud.url import get_url, get_urls, create_url, update_url, delete_url, get_urls_by_company_id
 from app.schemas.url import CreateURLDto, UpdateURLDto, ResponseURLDto
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Query
 
 router = APIRouter(
     prefix="/api/urls",
@@ -21,9 +23,15 @@ async def get_url_by_name(
 
 @router.get("/")
 async def get_all_urls(
-        db_session: DBSessionDep
+        db_session: DBSessionDep,
+        company_id: Optional[int] = Query(None, description="The ID of the company to filter URLs by")
 ):
-    return await get_urls(db_session)
+    if company_id:
+        return await get_urls_by_company_id(db_session, company_id)
+    else:
+        return await get_urls(db_session)
+
+
 
 
 @router.post("/", status_code=201)
