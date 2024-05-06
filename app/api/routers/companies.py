@@ -1,7 +1,9 @@
+
 from app.api.dependencies.core import DBSessionDep
 from app.crud.company import get_company, get_companies, delete_company, update_company, create_company
+from app.crud.url import get_urls_by_company_id
 from app.schemas.company import CreateCompanyDto, UpdateCompanyDto, ResponseCompanyDto
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 
 router = APIRouter(
     prefix="/api/companies",
@@ -31,6 +33,18 @@ async def create_compa(create_certificate_dto: CreateCompanyDto,
                        db_session: DBSessionDep
                        ):
     return await create_company(db_session, create_certificate_dto)
+
+
+@router.post("/{company_id}/rescan", status_code=201)
+async def rescan_company_urls(company_id: int,
+                              db_session: DBSessionDep,
+                              ):
+    urls = await get_urls_by_company_id(db_session, company_id)
+
+    for url in urls:
+        add_url_to_queue(url.url)
+
+    return urls
 
 
 @router.put("/{cert_id}")

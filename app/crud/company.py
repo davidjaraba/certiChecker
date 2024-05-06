@@ -1,4 +1,5 @@
 from app.models.models import Company as CompanyDBModel
+from app.models.models import URL as URLDBModel
 from app.schemas.company import CreateCompanyDto, UpdateCompanyDto
 from fastapi import HTTPException, Response
 from sqlalchemy import select

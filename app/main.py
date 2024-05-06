@@ -1,10 +1,11 @@
 import asyncio
 import logging
+import multiprocessing
 import sys
 import ssl
 from contextlib import asynccontextmanager
-
 import uvicorn
+
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -14,6 +15,8 @@ from app.api.routers.urls import router as urls_router
 from app.api.routers.resources import router as resources_router
 
 from home import Home
+
+from webscrapper import get_queue, start_consumer
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -42,6 +45,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="ssss", docs_url="/api/docs", debug=True)
 
+webscrap_queue = get_queue()
+consumer = start_consumer(webscrap_queue)
+
 # CORS Allow all
 app.add_middleware(
     CORSMiddleware,
@@ -54,6 +60,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
+    webscrap_queue.put('SDASSD')
     return {"message": "Hello World"}
 
 
@@ -76,89 +83,3 @@ if __name__ == "__main__":
     print("Inicializando API REST")
     asyncio.run(async_main())
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)
-
-# from typing import Any, Annotated
-#
-# from fastapi import FastAPI, Request, Body
-# from fastapi.encoders import jsonable_encoder
-# from fastapi.responses import JSONResponse
-# from sqlalchemy import create_engine, select, insert
-# from sqlalchemy.orm import Session
-# from models.models import Base
-# from models.models import Certificate
-# from pydantic import BaseModel
-#
-# from schemas.certificate import *
-#
-# app = FastAPI(debug=True)
-#
-# ruta = "base.db"
-#
-# engine = create_engine("sqlite:///" + ruta, echo=True)
-# session = Session(engine)
-#
-# prefix = "/api"
-#
-# Base.metadata.create_all(engine)
-#
-# #
-# # class UnicornException(Exception):
-# #     def __init__(self, name: str):
-# #         self.name = name
-# #
-# #
-# # @app.exception_handler(UnicornException)
-# # async def unicorn_exception_handler(request: Request, exc: UnicornException):
-# #     return JSONResponse(
-# #         status_code=418,
-# #         content={"message": f"Oops! {exc.name} did something. There goes a rainbow..."},
-# #     )
-#
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
-#
-#
-# @app.get("/hello/{name}")
-# async def say_hello(name: str):
-#     return {"message": f"Hello {name}"}
-#
-#
-# @app.get(prefix + "/certificates/")
-# async def list_certificates():
-#     stmt = select(Certificate)
-#     res = session.execute(stmt).fetchall()
-#
-#     if res is not None:
-#         res = [row._asdict() for row in res]
-#         json_response = jsonable_encoder(res)
-#     else:
-#         json_response = []
-#
-#     return JSONResponse(content=json_response)
-#
-#
-# @app.post(prefix + "/certificates/")
-# async def create_certificate(create_certificate: CreateCertificateDto) -> Any:
-#     stmt = insert(Certificate).values(create_certificate)
-#
-#     session.execute(stmt)
-#     session.commit()
-#
-#     json_response = jsonable_encoder(create_certificate)
-#
-#     return json_response
-#
-#
-# @app.get(prefix + "/certificates/{cert_id}")
-# async def get_certificate(cert_id):
-#     stmt = select(Certificate).where(Certificate.id == cert_id)
-#     res = session.execute(stmt).fetchone()
-#
-#     if res is not None:
-#         res = res._asdict()
-#         json_response = jsonable_encoder(res)
-#     else:
-#         return JSONResponse(status_code=404, content={"message": "Certificate not found"})
-#
-#     return JSONResponse(content=json_response)
