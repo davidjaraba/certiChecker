@@ -47,3 +47,6 @@ async def delete_cert(cert_id: int,
     return await delete_certificate(db_session, cert_id)
 
 
+
+
+

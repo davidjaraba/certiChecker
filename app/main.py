@@ -4,9 +4,11 @@ import multiprocessing
 import sys
 import ssl
 from contextlib import asynccontextmanager
+from multiprocessing import Queue, Process
+
 import uvicorn
 
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.api.routers.certificates import router as certificates_router
@@ -14,9 +16,11 @@ from app.api.routers.companies import router as companies_router
 from app.api.routers.urls import router as urls_router
 from app.api.routers.resources import router as resources_router
 
+from scrap_queue import get_webscrap_queue
+
 from home import Home
 
-from webscrapper import get_queue, start_consumer
+from webscrapper import consumer_handler, add_url_to_queue
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -45,9 +49,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="ssss", docs_url="/api/docs", debug=True)
 
-webscrap_queue = get_queue()
-consumer = start_consumer(webscrap_queue)
-
 # CORS Allow all
 app.add_middleware(
     CORSMiddleware,
@@ -58,11 +59,27 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-async def root():
-    webscrap_queue.put('SDASSD')
-    return {"message": "Hello World"}
+# @app.get("/")
+# async def root():
+#     webscrap_queue.put('SDASSD')
+#     return {"message": "Hello World"}
 
+
+class Test:
+
+    def __init__(self, name: str):
+        self.name = name
+        self.router = APIRouter()
+        self.router.add_api_route("/hello", self.hello, methods=["GET"])
+
+    def hello(self):
+        queue = get_webscrap_queue()
+        add_url_to_queue(queue, self.name)
+        return {"Hello": self.name}
+
+
+test = Test("test", )
+app.include_router(test.router)
 
 # Routers
 app.include_router(certificates_router)
@@ -78,6 +95,15 @@ async def async_main() -> None:
 
 
 if __name__ == "__main__":
+    queue = get_webscrap_queue()
+    consumer_process = Process(target=consumer_handler, args=(queue,))
+    consumer_process.start()
+
+    app.dependency_overrides[router.post("/enqueue/")] = lambda: queue
+
+    add_url_to_queue(queue, 'EOOEOEOE')
+    add_url_to_queue(queue, '22222')
+
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ssl_context.load_cert_chain('./cert/cert.pem', keyfile='./cert/key.pem')
     print("Inicializando API REST")
