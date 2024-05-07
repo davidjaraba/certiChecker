@@ -11,16 +11,14 @@ import uvicorn
 from fastapi import FastAPI, APIRouter
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from webscrapper import test
+
 from app.api.routers.certificates import router as certificates_router
 from app.api.routers.companies import router as companies_router
 from app.api.routers.urls import router as urls_router
 from app.api.routers.resources import router as resources_router
 
-from scrap_queue import get_webscrap_queue
-
 from home import Home
-
-from webscrapper import consumer_handler, add_url_to_queue
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -73,13 +71,14 @@ class Test:
         self.router.add_api_route("/hello", self.hello, methods=["GET"])
 
     def hello(self):
-        queue = get_webscrap_queue()
-        add_url_to_queue(queue, self.name)
+        res = test.delay(2, 7)
+        print('Esperando el resultado...')
+        print('Resultado:', res.get(timeout=10))
         return {"Hello": self.name}
 
 
-test = Test("test", )
-app.include_router(test.router)
+test_app = Test("test", )
+app.include_router(test_app.router)
 
 # Routers
 app.include_router(certificates_router)
@@ -95,15 +94,7 @@ async def async_main() -> None:
 
 
 if __name__ == "__main__":
-    queue = get_webscrap_queue()
-    consumer_process = Process(target=consumer_handler, args=(queue,))
-    consumer_process.start()
-
-    app.dependency_overrides[router.post("/enqueue/")] = lambda: queue
-
-    add_url_to_queue(queue, 'EOOEOEOE')
-    add_url_to_queue(queue, '22222')
-
+    test.delay(4, 6)
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ssl_context.load_cert_chain('./cert/cert.pem', keyfile='./cert/key.pem')
     print("Inicializando API REST")
