@@ -8,5 +8,4 @@ app = Celery('tasks', broker='sqla+sqlite:///celerydb.sqlite', backend='db+sqlit
 
 @app.task
 def test(x, y):
-    logging.info('Testing task')
     return x + y

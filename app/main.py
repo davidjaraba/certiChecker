@@ -73,7 +73,7 @@ class Test:
     def hello(self):
         res = test.delay(2, 7)
         print('Esperando el resultado...')
-        print('Resultado:', res.get(timeout=10))
+        print('Resultado:', res.result)
         return {"Hello": self.name}
 
 
