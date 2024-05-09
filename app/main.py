@@ -93,7 +93,10 @@ if __name__ == "__main__":
         allow_headers=["*"],
     )
 
-    _webscrap_queue = Queue()
+    # _webscrap_queue = Queue()
+    manager = multiprocessing.Manager()
+    _webscrap_queue = manager.Queue()
+
     consumer_process = Process(target=consumer_handler, args=(_webscrap_queue,))
     consumer_process.start()
 
