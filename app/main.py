@@ -5,6 +5,7 @@ import sys
 import ssl
 from contextlib import asynccontextmanager
 from multiprocessing import Queue, Process
+# from text_extract import extract
 
 import uvicorn
 
@@ -81,6 +82,18 @@ async def async_main() -> None:
 
 
 if __name__ == "__main__":
+    # extracted_entities = extract("ACCIONA ha implantado un sistema orie"
+    #                              "ntado hacia la mejora continua y la sostenibilidad en todos sus productos y servicios. ACCIONA ha implantado un sistema de gestión que integra los aspectos económicos, técnicos, legales, ambientales y sociales de la empresa, basados ​​en sus pr"
+    #                              "ocesos, y orientado hacia la mejora continua y la prevención de la contaminación.El sistema de gestión establecido ha sido auditado por AENOR, según los requisitos de las normas internacionales ISO 9001: 2015 e ISO 14001: 2015, obteniendo la certificación de la empresa tanto en el sistema de gestión de calidad como en el sistema de gestión amb"
+    #                              "obtenidos abarca la promoción de bienes inmuebles (gestión de diseño, gestión de construcción y gestión de), así como la administración de patrimonio inmobiliario.")
+    # print(extracted_entities)
+    #
+    # extracted_entities2 = extract("La valoración y percepción del cliente es muy importante para nosotros. En este sentido se realizan varios análisis en relación con las decisiones tomadas por los clientes:"
+    #                               "Análisis de los motivos de no compra: Todos los años se realiza un seguimiento de las razones por las que los clientes interesados en nuestras promociones terminan no comprando su vivienda con ACCIONA. Este análisis se realiza por cada una de las promociones."
+    #                               "ncuestas de satisfacción al cliente: Estas encuestas evalúan todas las fases del proceso de compra, desde el punto de venta y la firma del contrato, la valoración del inmueble y oferta, el funcionamiento de la vivienda y la actitud posterior a la entrega de esta. Se realiza de forma anual, sobre todas las promociones entregadas durante el año"
+    #                               "Derivadas de estos análisis selabora un plan de acción dedicado a la mejora de los puntos críticos detectados.")
+    # print(extracted_entities2)
+
     # queue = get_webscrap_queue()
     app = FastAPI(lifespan=lifespan, title="ssss", docs_url="/api/docs", debug=True)
 
@@ -109,6 +122,7 @@ if __name__ == "__main__":
     app.include_router(companies.router)
     app.include_router(urls_router)
     app.include_router(resources_router)
+
 
     # add_url_to_queue(_webscrap_queue, 'EOOEOEOE')
     # add_url_to_queue(_webscrap_queue, '22222')

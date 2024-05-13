@@ -1,6 +1,7 @@
 import base64, binascii
 import os
 from urllib.parse import urlparse, urljoin, urlunparse
+from text_extract import extract
 import logging
 
 import requests
@@ -179,6 +180,11 @@ def scrap_process(url: str, queue, depth):
         os.makedirs(folder + '/' + base_url + '/images')
 
     all_text, images, new_urls = scrap_url(base_url, queue, depth)
+
+    extracted_text = extract(all_text)
+
+    print('TEXTO OBTENIDO >>>>>>')
+    print(extracted_text)
 
     save_text(folder + '/' + base_url + '/site_text.txt', all_text)
 
