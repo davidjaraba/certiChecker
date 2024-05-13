@@ -1,14 +1,19 @@
 import base64, binascii
 import os
 from urllib.parse import urlparse, urljoin, urlunparse
+import logging
 
 import requests
 from bs4 import BeautifulSoup
 
 folder = 'resources'
 
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 
 def scrap_url(url: str, queue, current_depth):
+    from app.consumer import add_url_to_queue
     base_url = strip_scheme(url)
 
     parsed_url = urlparse(url)
@@ -33,9 +38,9 @@ def scrap_url(url: str, queue, current_depth):
         return all_text, images
 
     if request.status_code != 200:
-        print('Error accediendo a la url')
-        print(request.status_code)
-        print(request.reason)
+        # print('Error accediendo a la url')
+        # print(request.status_code)
+        # print(request.reason)
         return all_text, images
 
     soup = BeautifulSoup(request.text, 'html.parser')
@@ -52,7 +57,6 @@ def scrap_url(url: str, queue, current_depth):
 
     # Recorrer todos los enlaces de la página
 
-
     for link in soup.find_all('a'):
         href = link.get('href')
         if href:
@@ -62,13 +66,14 @@ def scrap_url(url: str, queue, current_depth):
             parsed_href = urlparse(full_url)
             # Comprobar si el enlace es del mismo dominio
 
-            print(href)
+            # print(href)
             if (parsed_href.netloc == parsed_url.netloc and parsed_href.path != parsed_url.path
                     and parsed_href.path != parsed_url.path + '/'):
                 new_urls.append(full_url)
                 depth = current_depth - 1
-                print('ASDASDA')
-                # if depth > 0:
+                # print('ASDASDA')
+                if depth > 0:
+                    add_url_to_queue(queue, full_url, depth)
                     # queue.put({'url': full_url, 'depth': depth})
 
     for img in soup.find_all('img'):
@@ -95,7 +100,7 @@ def download_images(current_url, image_urls, folder):
         os.makedirs(folder)
 
     for i, url in enumerate(image_urls):
-        print(url)
+        # print(url)
         try:
             if not "base64," in url:
                 response = requests.get(url, stream=True)
