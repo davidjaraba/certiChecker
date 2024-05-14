@@ -50,7 +50,7 @@ def add_url_to_queue(queue, url: str, depth=default_depth):
 def consumer_handler(queue):
     """Función consumidora que maneja los elementos de la cola."""
 
-    with Pool(processes=12) as pool:
+    with Pool(processes=4) as pool:
         while True:
             try:
                 print('Elementos actualmente en la cola =>>> '+str(queue.qsize()))
@@ -60,7 +60,7 @@ def consumer_handler(queue):
                 print(f'[ ======= ] Url {url} con depth {depth} agregado.')
                 # pool.starmap(scrap_process, [(url, queue, depth)])
                 pool.apply_async(scrap_process, args=(url, queue, depth))
-            except Queue.Empty:
+            except Exception as e:
                 print("No hay más elementos temporalmente en la cola, esperando más.")
                 time.sleep(5)
 

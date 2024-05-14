@@ -6,6 +6,7 @@ from typing import Optional
 
 class ResourceType(Enum):
     HTML = 'HTML'
+    TXT = 'TXT'
     IMG = 'IMG'
     DOC = 'DOC'
 
@@ -19,6 +20,8 @@ class CreateResourceDto(BaseModel):
 
     path_file: str
 
+    full_url: str
+
 
 class ResponseResourceDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -28,6 +31,8 @@ class ResponseResourceDto(BaseModel):
     type: ResourceType
 
     url_id: str
+
+    full_url: str
 
     path_file: str
 
@@ -42,3 +47,5 @@ class UpdateResourceDto(BaseModel):
     url_id: Optional[str] = None
 
     path_file: Optional[str] = None
+
+    full_url: Optional[str] = None

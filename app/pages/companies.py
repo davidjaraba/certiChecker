@@ -42,7 +42,7 @@ def main():
     company_id = st.query_params['id']
     company = get_company(company_id)
 
-    if company != []:
+    if company:
         st.title(company['name'])
 
         ass_urls = get_company_urls(company_id)
@@ -66,6 +66,24 @@ def main():
             if submit_button and url and company_id:
                 create_company(company_id, url)
                 st.experimental_rerun()
+
+        if company['companycertificates']:
+            st.markdown("### Certificados encontrados")
+            for cert in company['companycertificates']:
+                # Asumimos que cada 'cert' es un diccionario con 'certificate_name' y 'url'
+                cert = cert.get('certificate', 'Unknown Certificate')
+                cert_name = cert.get('name', 'Unknown Certificate')
+                url = cert.get('url', '')
+                if url:  # Solo agregamos un enlace si hay una URL disponible
+                    st.markdown(f"- **{cert_name}**: [Ver Certificado]({url})")
+                else:
+                    st.markdown(f"- **{cert_name}**: No disponible")
+        else:
+            st.markdown("### No se encontraron certificados")
+
+
+
+
 
 
 

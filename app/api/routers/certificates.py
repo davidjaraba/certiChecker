@@ -1,3 +1,5 @@
+from typing import Optional
+
 from app.api.dependencies.core import DBSessionDep
 from app.crud.certificate import get_certificate, get_certificates, create_certificate, delete_certificate, update_certificate
 from app.schemas.certificate import CreateCertificateDto, ResponseCertificateDto, UpdateCertificateDto
@@ -20,9 +22,10 @@ async def get_cert_by_id(
 
 @router.get("/")
 async def get_all_cert(
-        db_session: DBSessionDep
+        db_session: DBSessionDep,
+        name: Optional[str] = None
 ):
-    return await get_certificates(db_session)
+    return await get_certificates(db_session, name)
 
 
 @router.post("/", status_code=201)

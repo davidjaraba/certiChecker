@@ -1,9 +1,8 @@
 import base64, binascii
 import os
 from urllib.parse import urlparse, urljoin, urlunparse
-from text_extract import extract
 import logging
-
+from process_queue import send_task
 import requests
 from bs4 import BeautifulSoup
 
@@ -11,7 +10,6 @@ folder = 'resources'
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-
 
 def scrap_url(url: str, queue, current_depth):
     from app.consumer import add_url_to_queue
@@ -26,6 +24,7 @@ def scrap_url(url: str, queue, current_depth):
     all_text = ''
     images = []
     new_urls = []
+    documents = []
     request = ''
 
     headers = {
@@ -52,12 +51,7 @@ def scrap_url(url: str, queue, current_depth):
     texts = soup.stripped_strings
     all_text = ' '.join(texts)
 
-    # images = [get_full_image_url('https://' + url,
-    #                              img.get('src') or get_full_image_url('https://' + url, img.get('data-src')))
-    #           for img in soup.find_all('img') if img.get('src') or img.get('data-src')]
-
     # Recorrer todos los enlaces de la página
-
     for link in soup.find_all('a'):
         href = link.get('href')
         if href:
@@ -77,6 +71,11 @@ def scrap_url(url: str, queue, current_depth):
                     add_url_to_queue(queue, full_url, depth)
                     # queue.put({'url': full_url, 'depth': depth})
 
+            # Check for document links
+            if any(full_url.endswith(ext) for ext in ['.pdf', '.doc', '.docx', '.xls', '.xlsx']):
+                documents.append(full_url)
+                # download_file(full_url, 'documents')
+
     for img in soup.find_all('img'):
         if not "base64," in img:
             if img.get('src'):
@@ -88,18 +87,18 @@ def scrap_url(url: str, queue, current_depth):
 
     # base_domain = '{uri.scheme}://{uri.netloc}'.format(uri=parsed_url)
 
-    return all_text, images, new_urls
+    return all_text, images, new_urls, documents
 
 
-def save_text(filename, content):
+def save_text(base_url, filename, content):
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(content)
+    send_task(filename, 'txt', base_url, 'data_process')
 
 
-def download_images(current_url, image_urls, folder):
+def download_images(base_url, image_urls, folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
-
     for i, url in enumerate(image_urls):
         # print(url)
         try:
@@ -111,14 +110,39 @@ def download_images(current_url, image_urls, folder):
                     with open(file_path, 'wb') as f:
                         for chunk in response.iter_content(1024):
                             f.write(chunk)
+                    send_task(file_path, 'img', base_url, 'data_process')
             else:
                 file_path = os.path.join(folder, f'image_{i + 1}.svg')
                 image = base64_to_svg_string(url)
                 with open(file_path, 'wb') as f:
                     f.write(image)
+                send_task(file_path, 'img', base_url, 'data_process')
 
         except requests.exceptions.RequestException as e:
             print(f"Error al descargar {url}: {e}")
+
+
+def download_files(base_url, document_urls, directory):
+    for i, url in enumerate(document_urls):
+        try:
+            local_filename = os.path.join(directory, url.split('/')[-1])
+
+            try:
+                with requests.get(url, stream=True) as r:
+                    r.raise_for_status()
+                    with open(local_filename, 'wb') as f:
+                        for chunk in r.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                print(f"Archivo descargado: {local_filename}")
+
+                send_task(local_filename, 'doc', base_url, 'data_process')
+
+                return local_filename
+            except requests.RequestException as e:
+                print(f"Error al descargar el archivo: {e}")
+                return None
+        except requests.exceptions as e:
+            print(f"Error al descargar el archivo: {e}")
 
 
 def get_full_image_url(base_url, src_url):
@@ -179,15 +203,15 @@ def scrap_process(url: str, queue, depth):
     if not os.path.exists(folder + '/' + base_url + '/images'):
         os.makedirs(folder + '/' + base_url + '/images')
 
-    all_text, images, new_urls = scrap_url(base_url, queue, depth)
+    if not os.path.exists(folder + '/' + base_url + '/documents'):
+        os.makedirs(folder + '/' + base_url + '/documents')
 
-    extracted_text = extract(all_text)
+    all_text, images, new_urls, documents = scrap_url(base_url, queue, depth)
 
-    print('TEXTO OBTENIDO >>>>>>')
-    print(extracted_text)
-
-    save_text(folder + '/' + base_url + '/site_text.txt', all_text)
+    save_text(base_url, folder + '/' + base_url + '/site_text.txt', all_text)
 
     download_images(base_url, images, folder + '/' + base_url + '/images')
+
+    download_files(base_url, documents, folder + '/' + base_url + '/documents')
 
     return new_urls
