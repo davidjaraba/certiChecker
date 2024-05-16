@@ -39,12 +39,12 @@ class ExpiringSet:
 process_set = ExpiringSet()
 
 
-def add_url_to_queue(queue, url: str, depth=default_depth):
+def add_url_to_queue(queue, url: str, origin_url: str, depth=default_depth):
     """Función para añadir una URL a la cola."""
     # print(url)
     # process_set.add(url)
     if process_set.add(url):
-        queue.put({'url': url, 'depth': depth})
+        queue.put({'url': url, 'depth': depth, 'origin_url': origin_url})
 
 
 def consumer_handler(queue):
@@ -57,9 +57,10 @@ def consumer_handler(queue):
                 item = queue.get(timeout=300)
                 url = item['url']
                 depth = item['depth']
+                origin_url = item['origin_url']
                 print(f'[ ======= ] Url {url} con depth {depth} agregado.')
                 # pool.starmap(scrap_process, [(url, queue, depth)])
-                pool.apply_async(scrap_process, args=(url, queue, depth))
+                pool.apply_async(scrap_process, args=(url, queue, depth, origin_url))
             except Exception as e:
                 print("No hay más elementos temporalmente en la cola, esperando más.")
                 time.sleep(5)

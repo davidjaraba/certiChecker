@@ -32,7 +32,7 @@ def find_certificates(text, certs):
     return found_certs
 
 
-def basic_process(data_src, data_type, url):
+def basic_process(data_src, data_type, url, origin_url):
     # print(f'Processing {data_type} from {url}')
 
     text = ''
@@ -61,23 +61,34 @@ def basic_process(data_src, data_type, url):
     found_certs = find_certificates(text, certs)
 
     if found_certs:
-        url = requests.get(f"{API_URL}/urls/{url}")
+        response_url = requests.get(f"{API_URL}/urls/{origin_url}")
 
-        if url.status_code != 200:
+        if response_url.status_code != 200:
             logging.error(f"Error al obtener la company")
             return
 
         for cert, match, score in found_certs:
             print(f'Found certificate: {cert} as {match} with score {score}')
 
-            data_cert = requests.get(f"{API_URL}/certificates?name={cert}")
+            response_cert = requests.get(f"{API_URL}/certificates?name={cert}")
 
-            if data_cert.status_code != 200:
+            data_cert = response_cert.json()
+
+            if data_cert:
+                data_cert = data_cert[0]
+            else:
                 data_cert = requests.post(f'{API_URL}/certificates',
-                                          json={'name': cert})
+                                          json={'name': cert}).json()
+
+            data_type = data_type.upper()
+
+            response = requests.post(f'{API_URL}/resources',
+                                     json={'type': data_type, 'url_id': origin_url, 'path_file': data_src,
+                                           'full_url': url, 'certificate_id': data_cert.get('id')})
+
+            print(response.text)
 
 
-    #         TODO, guardar certificados
 
 
 
@@ -93,8 +104,9 @@ def callback(ch, method, properties, body):
     data_src = message.get('data_src')
     data_type = message.get('type')
     url = message.get('url')
+    origin_url = message.get('origin_url')
 
-    basic_process(data_src, data_type, url)
+    basic_process(data_src, data_type, url, origin_url)
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 

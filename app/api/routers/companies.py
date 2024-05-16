@@ -56,7 +56,7 @@ class CompaniesAPI:
         """
         urls = await get_urls_by_company_id(db, company_id)
         for url in urls:
-            add_url_to_queue(self.queue, url.url)
+            add_url_to_queue(self.queue, url.url, url.url)
         return urls
 
     async def update_company_by_id(self, comp_id: int, update_data: UpdateCompanyDto, db: DBSessionDep):

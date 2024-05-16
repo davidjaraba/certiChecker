@@ -22,6 +22,8 @@ class CreateResourceDto(BaseModel):
 
     full_url: str
 
+    certificate_id: int
+
 
 class ResponseResourceDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -36,6 +38,8 @@ class ResponseResourceDto(BaseModel):
 
     path_file: str
 
+    certificate_id: int
+
     created_at: str
 
 
@@ -49,3 +53,5 @@ class UpdateResourceDto(BaseModel):
     path_file: Optional[str] = None
 
     full_url: Optional[str] = None
+
+    certificate_id: Optional[int] = None

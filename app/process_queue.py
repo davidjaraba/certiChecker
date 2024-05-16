@@ -16,7 +16,7 @@ connection_params = pika.ConnectionParameters(host, 5672, 'qojzruiu', credential
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 
-def send_task(data_src, data_type, url, queue='default'):
+def send_task(data_src, data_type, url, origin_url, queue='default'):
     data_src = data_src.replace("//", "/")
     data_src = data_src.replace("\\", "/")
 
@@ -34,7 +34,8 @@ def send_task(data_src, data_type, url, queue='default'):
             message_body = {
                 'data_src': data_src,
                 'type': data_type,
-                'url': url
+                'url': url,
+                'origin_url': origin_url
             }
 
             # Convertir el mensaje a formato JSON

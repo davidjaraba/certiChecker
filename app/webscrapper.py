@@ -11,7 +11,8 @@ folder = 'resources'
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
-def scrap_url(url: str, queue, current_depth):
+
+def scrap_url(url: str, queue, current_depth, origin_url: str):
     from app.consumer import add_url_to_queue
     base_url = strip_scheme(url)
 
@@ -68,7 +69,7 @@ def scrap_url(url: str, queue, current_depth):
                 depth = current_depth - 1
                 # print('ASDASDA')
                 if depth > 0:
-                    add_url_to_queue(queue, full_url, depth)
+                    add_url_to_queue(queue, full_url, origin_url, depth)
                     # queue.put({'url': full_url, 'depth': depth})
 
             # Check for document links
@@ -90,13 +91,13 @@ def scrap_url(url: str, queue, current_depth):
     return all_text, images, new_urls, documents
 
 
-def save_text(base_url, filename, content):
+def save_text(base_url, filename, content, origin_url):
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(content)
-    send_task(filename, 'txt', base_url, 'data_process')
+    send_task(filename, 'txt', base_url, origin_url, 'data_process')
 
 
-def download_images(base_url, image_urls, folder):
+def download_images(base_url, image_urls, folder, origin_url):
     if not os.path.exists(folder):
         os.makedirs(folder)
     for i, url in enumerate(image_urls):
@@ -110,19 +111,19 @@ def download_images(base_url, image_urls, folder):
                     with open(file_path, 'wb') as f:
                         for chunk in response.iter_content(1024):
                             f.write(chunk)
-                    send_task(file_path, 'img', base_url, 'data_process')
+                    send_task(file_path, 'img', base_url, origin_url, 'data_process')
             else:
                 file_path = os.path.join(folder, f'image_{i + 1}.svg')
                 image = base64_to_svg_string(url)
                 with open(file_path, 'wb') as f:
                     f.write(image)
-                send_task(file_path, 'img', base_url, 'data_process')
+                send_task(file_path, 'img', base_url, origin_url,'data_process')
 
         except requests.exceptions.RequestException as e:
             print(f"Error al descargar {url}: {e}")
 
 
-def download_files(base_url, document_urls, directory):
+def download_files(base_url, document_urls, directory, origin_url):
     for i, url in enumerate(document_urls):
         try:
             local_filename = os.path.join(directory, url.split('/')[-1])
@@ -135,7 +136,7 @@ def download_files(base_url, document_urls, directory):
                             f.write(chunk)
                 print(f"Archivo descargado: {local_filename}")
 
-                send_task(local_filename, 'doc', base_url, 'data_process')
+                send_task(local_filename, 'doc', base_url, origin_url, 'data_process')
 
                 return local_filename
             except requests.RequestException as e:
@@ -189,7 +190,7 @@ def base64_to_svg_string(base64_string):
     return svg_data
 
 
-def scrap_process(url: str, queue, depth):
+def scrap_process(url: str, queue, depth, origin_url):
     base_url = strip_scheme(url)
 
     print("Processing", base_url)
@@ -206,12 +207,12 @@ def scrap_process(url: str, queue, depth):
     if not os.path.exists(folder + '/' + base_url + '/documents'):
         os.makedirs(folder + '/' + base_url + '/documents')
 
-    all_text, images, new_urls, documents = scrap_url(base_url, queue, depth)
+    all_text, images, new_urls, documents = scrap_url(base_url, queue, depth, origin_url)
 
-    save_text(base_url, folder + '/' + base_url + '/site_text.txt', all_text)
+    save_text(base_url, folder + '/' + base_url + '/site_text.txt', all_text, origin_url)
 
-    download_images(base_url, images, folder + '/' + base_url + '/images')
+    download_images(base_url, images, folder + '/' + base_url + '/images', origin_url)
 
-    download_files(base_url, documents, folder + '/' + base_url + '/documents')
+    download_files(base_url, documents, folder + '/' + base_url + '/documents', origin_url)
 
     return new_urls
