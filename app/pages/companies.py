@@ -8,7 +8,7 @@ API_URL = "http://localhost:8000/api"
 
 def get_company(company_id):
     """Obtiene y muestra un certificado."""
-    response = requests.get(f"{API_URL}/companies/{company_id}")
+    response = requests.get(f"{API_URL}/companies/{company_id}?last_certs=true")
     if response.status_code == 200:
         return response.json()
     else:
@@ -71,11 +71,13 @@ def main():
             st.markdown("### Certificados encontrados")
             for cert in company['companycertificates']:
                 # Asumimos que cada 'cert' es un diccionario con 'certificate_name' y 'url'
-                cert = cert.get('certificate', 'Unknown Certificate')
-                cert_name = cert.get('name', 'Unknown Certificate')
-                url = cert.get('url', '')
-                if url:  # Solo agregamos un enlace si hay una URL disponible
-                    st.markdown(f"- **{cert_name}**: [Ver Certificado]({url})")
+                cert_data = cert.get('certificate', 'Unknown Certificate')
+                cert_name = cert_data.get('name', 'Unknown Certificate')
+                resource_id = cert.get('resource_id', 'NORESOURCE')
+                if resource_id:
+                    link = f'{cert_name} - <a href="../resources/?id={resource_id}" target="_blank">Ver certificado</a>'
+                    # Mostrar el enlace con Markdown en Streamlit
+                    st.markdown(link, unsafe_allow_html=True)
                 else:
                     st.markdown(f"- **{cert_name}**: No disponible")
         else:

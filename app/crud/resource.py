@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from sqlalchemy.orm import joinedload
+
 from app.models.models import Resource as ResourceDBModel
 from app.models.models import CompanyCertificate as CompanyCertificateDBModel
 from app.models.models import URL as URLDBModel
@@ -12,7 +14,9 @@ import uuid
 
 
 async def get_resource(db_session: AsyncSession, res_id: str):
-    cert = (await db_session.scalars(select(ResourceDBModel).where(ResourceDBModel.id == res_id))).first()
+    cert = (await db_session.scalars(select(ResourceDBModel)
+                                     .options(joinedload(ResourceDBModel.certificate).joinedload(CompanyCertificateDBModel.certificate))
+                                     .where(ResourceDBModel.id == res_id))).first()
 
     if not cert:
         return Response(status_code=404, content="Resource not found")

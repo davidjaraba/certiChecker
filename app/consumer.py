@@ -1,3 +1,4 @@
+import logging
 from multiprocessing import Process, Pool, Queue
 
 from app.webscrapper import scrap_process
@@ -16,7 +17,7 @@ class ExpiringSet:
         ttl = 900  # 2 minutos en segundos
         if element not in self.elements:
             self.elements[element] = current_time + ttl
-            print(f"Elemento '{element}' añadido, expirará en {ttl} segundos.")
+            logging.debug(f"Elemento '{element}' añadido, expirará en {ttl} segundos.")
             return True
         else:
             # print(f"Elemento '{element}' ya está en la lista.")
@@ -28,7 +29,7 @@ class ExpiringSet:
         expired_keys = [key for key, expire_time in self.elements.items() if expire_time < current_time]
         for key in expired_keys:
             del self.elements[key]
-            print(f"Elemento '{key}' eliminado por expiración.")
+            logging.debug(f"Elemento '{key}' eliminado por expiración.")
 
     def current_elements(self):
         """Retorna una lista de elementos no expirados."""
@@ -50,7 +51,7 @@ def add_url_to_queue(queue, url: str, origin_url: str, depth=default_depth):
 def consumer_handler(queue):
     """Función consumidora que maneja los elementos de la cola."""
 
-    with Pool(processes=4) as pool:
+    with Pool(processes=10) as pool:
         while True:
             try:
                 print('Elementos actualmente en la cola =>>> '+str(queue.qsize()))

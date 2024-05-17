@@ -10,6 +10,7 @@ folder = 'resources'
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("aiosqlite").setLevel(logging.WARNING)
 
 
 def scrap_url(url: str, queue, current_depth, origin_url: str):
@@ -21,7 +22,7 @@ def scrap_url(url: str, queue, current_depth, origin_url: str):
         url = 'https://' + url
         parsed_url = urlparse(url)
 
-    print('Escaneando url {}'.format(url))
+    logging.log(logging.INFO, 'Escaneando url {}'.format(url))
     all_text = ''
     images = []
     new_urls = []
@@ -29,7 +30,8 @@ def scrap_url(url: str, queue, current_depth, origin_url: str):
     request = ''
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/58.0.3029.110 Safari/537.3'
     }
 
     try:
@@ -72,8 +74,8 @@ def scrap_url(url: str, queue, current_depth, origin_url: str):
                     add_url_to_queue(queue, full_url, origin_url, depth)
                     # queue.put({'url': full_url, 'depth': depth})
 
-            # Check for document links
-            if any(full_url.endswith(ext) for ext in ['.pdf', '.doc', '.docx', '.xls', '.xlsx']):
+            # Check for document links   , '.doc', '.docx', '.xls', '.xlsx'
+            if any(full_url.endswith(ext) for ext in ['.pdf']):
                 documents.append(full_url)
                 # download_file(full_url, 'documents')
 
@@ -127,7 +129,6 @@ def download_files(base_url, document_urls, directory, origin_url):
     for i, url in enumerate(document_urls):
         try:
             local_filename = os.path.join(directory, url.split('/')[-1])
-
             try:
                 with requests.get(url, stream=True) as r:
                     r.raise_for_status()
@@ -137,11 +138,8 @@ def download_files(base_url, document_urls, directory, origin_url):
                 print(f"Archivo descargado: {local_filename}")
 
                 send_task(local_filename, 'doc', base_url, origin_url, 'data_process')
-
-                return local_filename
             except requests.RequestException as e:
                 print(f"Error al descargar el archivo: {e}")
-                return None
         except requests.exceptions as e:
             print(f"Error al descargar el archivo: {e}")
 

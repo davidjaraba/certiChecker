@@ -1,3 +1,5 @@
+from typing import Optional
+
 from starlette import status
 
 from app.api.dependencies.core import DBSessionDep
@@ -31,11 +33,11 @@ class CompaniesAPI:
         self.router.add_api_route("/{comp_id}", self.update_company_by_id, methods=["PUT"])
         self.router.add_api_route("/{comp_id}", self.delete_company_by_id, methods=["DELETE"])
 
-    async def get_company_by_id(self, comp_id: int, db: DBSessionDep):
+    async def get_company_by_id(self, comp_id: int, db: DBSessionDep, last_certs: Optional[bool] = False):
         """
         Retrieve a single company by its ID.
         """
-        return await get_company(db, comp_id)
+        return await get_company(db, comp_id, last_certs)
 
     async def get_all_companies(self, db: DBSessionDep):
         """

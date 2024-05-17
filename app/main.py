@@ -30,7 +30,7 @@ from database import sessionmanager
 from models.models import Base
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG if settings.log_level == "DEBUG" else logging.INFO)
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
 
 
 # engine = create_async_engine('sqlite+aiosqlite:///base.db')
