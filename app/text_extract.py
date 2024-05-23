@@ -1,27 +1,47 @@
-from transformers import TFAutoModelForTokenClassification, AutoTokenizer, pipeline
+from fuzzywuzzy import process, fuzz
+from transformers import AutoTokenizer, TFAutoModelForTokenClassification, pipeline
+from langdetect import detect, detect_langs
+import spacy
 
 
-def extract(text):
-    tokenizer = AutoTokenizer.from_pretrained("mrm8488/bert-spanish-cased-finetuned-ner")
-    model = TFAutoModelForTokenClassification.from_pretrained("mrm8488/bert-spanish-cased-finetuned-ner", from_pt=True)
-    # Crear un pipeline de NER usando el modelo y el tokenizador cargados
-    nlp = pipeline("ner", model=model, tokenizer=tokenizer)
+def extract(text, certs, use_nlp, umbral=80):
+    found_certs = []
 
-    # Aplicar el pipeline al texto
-    results = nlp(text)
+    if use_nlp:
+        lang = 'en'
+        try:
+            lang = detect(text)
+        except Exception as e:
+            print(e)
 
-    certificates = []
-    current_cert = ""
+        nlp = None
 
-    for entity in results:
-        if entity['entity'] == 'B-MISC':  # Comienzo de un nuevo certificado
-            if current_cert:  # Guardar el certificado anterior si existe
-                certificates.append(current_cert)
-            current_cert = entity['word'].replace("##", "")  # Iniciar nuevo certificado
-        elif entity['entity'] == 'I-MISC':  # Continuación del certificado actual
-            current_cert += entity['word'].replace("##", "")
+        if lang == 'es':
+            nlp = spacy.load("es_core_news_sm")
+        else:
+            nlp = spacy.load("en_core_web_sm")
 
-    if current_cert:  # Asegurar que el último certificado se añada
-        certificates.append(current_cert)
+        # Procesar el texto
+        doc = nlp(text)
 
-    return certificates
+        found_certs = [ent.text for ent in doc.ents if ent.text in certs]
+    else:
+        text = text.replace('\n', ' ').replace('\r', '').replace(' ', '')
+        # print(text)
+        best_cert_score = 0
+        best_cert = None
+        for cert in certs:
+            matches = process.extract(cert.lower().replace(' ', ''), [word.lower() for word in text.split()], limit=1,
+                                      scorer=fuzz.partial_ratio)
+            for match in matches:
+                # print(cert + ' ' + str(match[1]))
+                if match[1] >= umbral and match[1] > best_cert_score:  # 75 es un umbral de similitud, puedes ajustarlo según sea necesario
+                    best_cert_score = match[1]
+                    best_cert = cert
+
+        if best_cert is not None:
+            found_certs.append(best_cert)
+
+    print(found_certs)
+
+    return found_certs

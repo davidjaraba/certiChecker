@@ -68,7 +68,7 @@ def main():
                 st.experimental_rerun()
 
         if company['companycertificates']:
-            st.markdown("### Certificados encontrados")
+            st.markdown(f"### Certificados encontrados {len(company['companycertificates'])}")
             for cert in company['companycertificates']:
                 # Asumimos que cada 'cert' es un diccionario con 'certificate_name' y 'url'
                 cert_data = cert.get('certificate', 'Unknown Certificate')
