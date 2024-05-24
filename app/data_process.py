@@ -10,9 +10,9 @@ import fitz
 import cv2
 
 from PIL import Image, ImageFile, UnidentifiedImageError, ImageEnhance
-from PIL.Image import Resampling
+from langdetect import detect, detect_langs
+import spacy
 
-from text_extract import extract
 import pytesseract
 
 from fuzzywuzzy import fuzz, process
@@ -40,22 +40,6 @@ certs_to_find = []
 
 whitelist_chars = " &'(),-.0123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ­ÁÂÍÏÑÓáâíïñó"
 
-def find_certificates(text, certs_to_process, nlp):
-    # found_certs = []
-    # for cert in certs:
-    #     matches = process.extract(cert, text.split(), limit=2, scorer=fuzz.token_sort_ratio)
-    #     for match in matches:
-    #         if match[1] > 80:  # 80 es un umbral de similitud, puedes ajustarlo según sea necesario
-    #             found_certs.append((cert, match[0], match[1]))
-
-    return extract(text, certs_to_process, nlp)
-    # res_certs = []
-    # for cert in certs:
-    #     res_certs.append(cert)
-    #     print(cert)
-    #
-    # return res_certs
-
 
 def get_circular_text_from_img(img_src):
     found_text = ''
@@ -63,7 +47,7 @@ def get_circular_text_from_img(img_src):
     # Read image
     img = cv2.imread(img_src)
 
-    cv2.imwrite('img2.jpg', img)
+    # cv2.imwrite('img2.jpg', img)
 
     # Convert to grayscale, and binarize, especially for removing JPG artifacts
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -97,20 +81,20 @@ def get_circular_text_from_img(img_src):
 
     center = (int(h // 2.45), int(h // 2))
 
-    cv2.circle(gray, center, 5, (0, 0, 0), -1)
+    # cv2.circle(gray, center, 5, (0, 0, 0), -1)
 
-    cv2.imwrite('img1.jpg', gray)
+    # cv2.imwrite('img1.jpg', gray)
 
     max_radius = int(h * 0.5)
 
     # Actual remapping to polar coordinate space
     gray = cv2.warpPolar(gray, (-1, -1), center, max_radius,
                          cv2.INTER_CUBIC + cv2.WARP_POLAR_LINEAR)
-    cv2.imwrite('img2.jpg', gray)
+    # cv2.imwrite('img2.jpg', gray)
     # Rotate result for OCR
     gray = cv2.rotate(gray, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
-    cv2.imwrite('img3.jpg', gray)
+    # cv2.imwrite('img3.jpg', gray)
 
     # Actual OCR, limiting to capital letters only
     config = f'--psm 6 -c  tessedit_char_whitelist="{whitelist_chars}"'
@@ -145,7 +129,9 @@ def extract_text(image_src):
         logging.debug(f"Ocurrió un error inesperado: {str(e)}")
 
 
-def extract_text_from_pdf(src):
+def extract_text_from_pdf(src, certs):
+    found_certs = []
+
     try:
         # Abrir el archivo PDF
         pdf_document = fitz.open(src)
@@ -159,7 +145,8 @@ def extract_text_from_pdf(src):
 
             # Extraer y mostrar el texto
             text = page.get_text("text")
-            # print(f"Texto en la página {page_num + 1}:\n{text}\n")
+
+            found_certs += find_certs_in_text(text, certs, True, 90)
 
             # Extraer y guardar imágenes
             images = page.get_images(full=True)
@@ -179,17 +166,8 @@ def extract_text_from_pdf(src):
                         logging.debug('TEXTO ENCONTRADO EN PDF ')
                         logging.debug(image_text)
 
-                        text += ' ' + image_text
+                        found_certs += find_certs_in_text(image_text, certs, False, 82)
 
-                        # image_path = f"pagina{page_num + 1}_imagen{img_index + 1}.{image_ext}"
-
-                        # if not os.path.exists(dir_to_save):
-                        #     os.makedirs(dir_to_save)
-
-                        # image.save(dir_to_save+'/'+image_path)
-
-                        # print(
-                        #     f"Imagen extraída en la página {page_num + 1}, imagen {img_index + 1} guardada como {image_path}")
                 except UnidentifiedImageError:
                     logging.debug(
                         f"No se pudo identificar la imagen en la página {page_num + 1}, imagen {img_index + 1}")
@@ -200,22 +178,25 @@ def extract_text_from_pdf(src):
                     logging.debug(
                         f"Ocurrió un error inesperado al procesar la imagen en la página {page_num + 1}, imagen {img_index + 1}: {str(e)}")
 
-            return text
-
         except Exception as e:
             logging.debug(f"Ocurrió un error al procesar la página {page_num + 1}: {str(e)}")
 
+    return found_certs
+
 
 def basic_process(data_src, data_type, url, origin_url, certs):
-    # print(f'Processing {data_type} from {url}')
+    found_certs = set()
 
     text = ''
 
     nlp = False
 
+    umbral = 82
+
     match data_type:
         case 'txt':
             nlp = True
+            umbral = 90
             with open(data_src, 'r', encoding='utf-8') as file:
                 text = file.read()
 
@@ -223,14 +204,22 @@ def basic_process(data_src, data_type, url, origin_url, certs):
             text = extract_text(data_src)
 
         case 'doc':
+            nlp = True
             _, file_extension = os.path.splitext(data_src)
 
             if file_extension == '.pdf':
-                text = extract_text_from_pdf(data_src)
+                ex_certs = extract_text_from_pdf(data_src, certs)
 
-            # doc = Document(data_src)
-            # doc_text = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
-            # print(f'Document data: {doc_text}')
+                if ex_certs is not None:
+                    for ex_cert in ex_certs:
+                        found_certs.add(ex_cert)
+
+                #
+                # if text_from_image:
+                #     certs_into_images = find_certs_in_text(text_from_image, certs, False)
+                #
+                #     for cert in certs_into_images:
+                #         found_certs.append(cert)
 
         case _:
             logging.debug(f'Unsupported data type: {data_type}')
@@ -238,41 +227,49 @@ def basic_process(data_src, data_type, url, origin_url, certs):
     found_and_filtered_certs = []
 
     if text:
-        found_certs = find_certificates(text, certs, nlp)
+        ex_certs = find_certs_in_text(text, certs, nlp, umbral)
+
+        if ex_certs is not None:
+            for ex_cert in ex_certs:
+                found_certs.add(ex_cert)
 
         if found_certs:
-            response_url = requests.get(f"{API_URL}/urls/{origin_url}")
+            found_and_filtered_certs = save_founded_certs(found_certs, data_src, data_type, origin_url, url)
 
-            if response_url.status_code != 200:
-                logging.error(f"Error al obtener la company")
-                return
+    return list(found_certs)
 
-            for cert in found_certs:
-                logging.debug(f'Found certificate: {cert} ')
 
-                response_cert = requests.get(f"{API_URL}/certificates?name={cert}")
+def save_founded_certs(found_certs, data_src, data_type, origin_url, url):
+    certs = []
 
-                data_cert = response_cert.json()
+    response_url = requests.get(f"{API_URL}/urls/{origin_url}")
 
-                if data_cert:
-                    data_cert = data_cert[0]
-                else:
-                    data_cert = requests.post(f'{API_URL}/certificates',
-                                              json={'name': cert}).json()
+    if response_url.status_code != 200:
+        logging.error(f"Error al obtener la company")
+        return
 
-                data_type = data_type.upper()
+    for cert in found_certs:
+        logging.debug(f'Found certificate: {cert} ')
 
-                response = requests.post(f'{API_URL}/resources',
-                                         json={'type': data_type, 'url_id': origin_url, 'path_file': data_src,
-                                               'full_url': url, 'certificate_id': data_cert.get('id')})
+        response_cert = requests.get(f"{API_URL}/certificates?name={cert}")
 
-                found_and_filtered_certs.append(cert)
+        data_cert = response_cert.json()
 
-                logging.debug(response.text)
+        if data_cert:
+            data_cert = data_cert[0]
+        else:
+            data_cert = requests.post(f'{API_URL}/certificates',
+                                      json={'name': cert}).json()
 
-        return found_and_filtered_certs
+        data_type = data_type.upper()
 
-    # time.sleep(.5)
+        response = requests.post(f'{API_URL}/resources',
+                                 json={'type': data_type, 'url_id': origin_url, 'path_file': data_src,
+                                       'full_url': url, 'certificate_id': data_cert.get('id')})
+
+        certs.append(cert)
+
+    return certs
 
 
 def callback(ch, method, properties, body):
@@ -335,9 +332,62 @@ def unique_characters(strings):
 
     return ''.join(sorted_chars)
 
+
+def find_certs_in_text(text, certs, use_nlp, umbral=82):
+    print('[*] Finding certs... '+str(use_nlp))
+
+    found_certs = []
+
+    if text:
+        if use_nlp:
+            lang = 'en'
+            try:
+                lang = detect(text)
+            except Exception as e:
+                print(e)
+
+            nlp = None
+
+            print(text)
+            print(lang)
+
+            if lang == 'es':
+                nlp = spacy.load("es_core_news_sm")
+            else:
+                nlp = spacy.load("en_core_web_sm")
+
+            # Procesar el texto
+            doc = nlp(text)
+
+            found_certs = [ent.text for ent in doc.ents if ent.text in certs]
+
+            print(found_certs)
+        else:
+            text = text.replace('\n', ' ').replace('\r', '').replace(' ', '')
+            print(text)
+            best_cert_score = 0
+            best_cert = None
+            for cert in certs:
+                matches = process.extract(cert.lower().replace(' ', ''), [word.lower() for word in text.split() if len(word) > 4],
+                                          limit=1,
+                                          scorer=fuzz.partial_ratio)
+                for match in matches:
+                    print(cert + ' ' + str(match[1]))
+                    if match[1] >= umbral and match[
+                        1] > best_cert_score:  # 75 es un umbral de similitud, puedes ajustarlo según sea necesario
+                        best_cert_score = match[1]
+                        best_cert = cert
+
+            if best_cert is not None:
+                found_certs.append(best_cert)
+
+        print(found_certs)
+
+    return found_certs
+
+
 if __name__ == "__main__":
     logging.info('Procesando datos en la cola')
-
 
     wb = load_workbook('Glosario_Certificaciones.xlsx')
     sheet = wb.active

@@ -48,16 +48,12 @@ async def lifespan(app: FastAPI):
         await sessionmanager.close()
 
 
-
-
-
 # @app.get("/")
 # async def root():
 #     webscrap_queue.put('SDASSD')
 #     return {"message": "Hello World"}
 
 from multiprocessing import Queue
-
 
 
 class Test:
@@ -73,16 +69,10 @@ class Test:
         return {"Hello": self.name}
 
 
-
-
 async def async_main() -> None:
     print("Creando tablas...")
     async with sessionmanager._engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-
-
-
 
 
 if __name__ == "__main__":

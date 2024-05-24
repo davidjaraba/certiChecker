@@ -5,7 +5,6 @@ import requests
 API_URL = "http://localhost:8000/api"
 
 
-
 def get_company(company_id):
     """Obtiene y muestra un certificado."""
     response = requests.get(f"{API_URL}/companies/{company_id}?last_certs=true")
@@ -25,6 +24,7 @@ def get_company_urls(company_id):
         st.error(f'Error al obtener')
         return []
 
+
 def create_company(company_id, url):
     """Crea un nuevo certificado."""
     response = requests.post(f"{API_URL}/urls", json={"url": url, "company_id": company_id})
@@ -32,10 +32,8 @@ def create_company(company_id, url):
         st.success(f'Company creada con éxito')
         return True
     else:
-        st.error(f'Error al crear el company '+response.text)
+        st.error(f'Error al crear el company ' + response.text)
         return False
-
-
 
 
 def main():
@@ -82,11 +80,6 @@ def main():
                     st.markdown(f"- **{cert_name}**: No disponible")
         else:
             st.markdown("### No se encontraron certificados")
-
-
-
-
-
 
 
 if __name__ == "__main__":
