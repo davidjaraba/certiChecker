@@ -97,7 +97,7 @@ def get_circular_text_from_img(img_src):
     # cv2.imwrite('img3.jpg', gray)
 
     # Actual OCR, limiting to capital letters only
-    config = f'--psm 6 -c  tessedit_char_whitelist="{whitelist_chars}"'
+    config = f'--psm 6 -c tessedit_char_whitelist="{whitelist_chars}"'
     text = pytesseract.image_to_string(gray, config=config)
 
     found_text += text.replace('\n', '').replace('\f', '')
@@ -120,12 +120,12 @@ def extract_text(image_src):
         custom_config = f'--oem 3 --psm 6 -c tessedit_char_whitelist="{whitelist_chars}"'
         text += pytesseract.image_to_string(image, lang='eng', config=custom_config)
 
-        print(text)
+        logging.debug(text)
 
         return text.strip()
 
     except Exception as e:
-        print(str(e))
+        logging.debug(str(e))
         logging.debug(f"Ocurrió un error inesperado: {str(e)}")
 
 
@@ -140,6 +140,7 @@ def extract_text_from_pdf(src, certs):
         return
 
     for page_num in range(pdf_document.page_count):
+        print(f'Procesando pagina '+str(page_num))
         try:
             page = pdf_document.load_page(page_num)
 
@@ -166,7 +167,7 @@ def extract_text_from_pdf(src, certs):
                         logging.debug('TEXTO ENCONTRADO EN PDF ')
                         logging.debug(image_text)
 
-                        found_certs += find_certs_in_text(image_text, certs, False, 82)
+                        found_certs += find_certs_in_text(image_text, certs, False, 85)
 
                 except UnidentifiedImageError:
                     logging.debug(
@@ -193,6 +194,9 @@ def basic_process(data_src, data_type, url, origin_url, certs):
 
     umbral = 82
 
+    print('Certificados encontrados: '+ data_src)
+    print(list(found_certs))
+
     match data_type:
         case 'txt':
             nlp = True
@@ -201,9 +205,10 @@ def basic_process(data_src, data_type, url, origin_url, certs):
                 text = file.read()
 
         case 'img':
+            umbral = 85
             text = extract_text(data_src)
 
-        case 'doc':
+        case 'doca':
             nlp = True
             _, file_extension = os.path.splitext(data_src)
 
@@ -214,7 +219,7 @@ def basic_process(data_src, data_type, url, origin_url, certs):
                     for ex_cert in ex_certs:
                         found_certs.add(ex_cert)
 
-                #
+
                 # if text_from_image:
                 #     certs_into_images = find_certs_in_text(text_from_image, certs, False)
                 #
@@ -223,6 +228,8 @@ def basic_process(data_src, data_type, url, origin_url, certs):
 
         case _:
             logging.debug(f'Unsupported data type: {data_type}')
+
+
 
     found_and_filtered_certs = []
 
@@ -233,13 +240,19 @@ def basic_process(data_src, data_type, url, origin_url, certs):
             for ex_cert in ex_certs:
                 found_certs.add(ex_cert)
 
-        if found_certs:
-            found_and_filtered_certs = save_founded_certs(found_certs, data_src, data_type, origin_url, url)
+
+    if found_certs:
+        try:
+            found_and_filtered_certs = save_founded_certs(list(found_certs), data_src, data_type, origin_url, url)
+        except Exception as e:
+            print(e)
 
     return list(found_certs)
 
 
 def save_founded_certs(found_certs, data_src, data_type, origin_url, url):
+    print(found_certs)
+
     certs = []
 
     response_url = requests.get(f"{API_URL}/urls/{origin_url}")
@@ -282,15 +295,17 @@ def callback(ch, method, properties, body):
     url = message.get('url')
     origin_url = message.get('origin_url')
 
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
     start_time = time.time()
 
     basic_process(data_src, data_type, url, origin_url, certs_to_find)
 
     end_time = time.time()
     elapsed_time = end_time - start_time
-    logging.info(f"Tiempo transcurrido en basic_process: {elapsed_time:.2f} segundos")
+    print(f"Tiempo transcurrido en basic_process: {elapsed_time:.2f} segundos")
 
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+
 
 
 def consume_messages(queue='default'):
@@ -338,41 +353,46 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
 
     found_certs = []
 
+    print(text)
+
     if text:
         if use_nlp:
             lang = 'en'
             try:
                 lang = detect(text)
             except Exception as e:
-                print(e)
+                logging.debug(e)
 
             nlp = None
 
-            print(text)
-            print(lang)
+            logging.debug(text)
+            logging.debug(lang)
 
             if lang == 'es':
                 nlp = spacy.load("es_core_news_sm")
             else:
                 nlp = spacy.load("en_core_web_sm")
 
+            nlp.max_length = 20000000
+
             # Procesar el texto
             doc = nlp(text)
 
             found_certs = [ent.text for ent in doc.ents if ent.text in certs]
 
-            print(found_certs)
+            # print(found_certs)
         else:
             text = text.replace('\n', ' ').replace('\r', '').replace(' ', '')
-            print(text)
+            # print(text)
             best_cert_score = 0
             best_cert = None
             for cert in certs:
                 matches = process.extract(cert.lower().replace(' ', ''), [word.lower() for word in text.split() if len(word) > 4],
                                           limit=1,
                                           scorer=fuzz.partial_ratio)
+                # matches = process.extract(cert, text, limit=2)
                 for match in matches:
-                    print(cert + ' ' + str(match[1]))
+                    # print(cert + ' ' + str(match[1]))
                     if match[1] >= umbral and match[
                         1] > best_cert_score:  # 75 es un umbral de similitud, puedes ajustarlo según sea necesario
                         best_cert_score = match[1]
@@ -384,6 +404,7 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
         print(found_certs)
 
     return found_certs
+
 
 
 if __name__ == "__main__":

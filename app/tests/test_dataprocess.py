@@ -312,6 +312,74 @@ class TestBasicProcess(unittest.TestCase):
         self.assertEqual(res_certs, needed_certs)
 
     @patch('app.data_process.save_founded_certs')
+    def test_basic_process_img_17(self, mock_save_founded_certs):
+        res_certs = []
+        data_type = 'img'
+        img_for_test = 'good.jpg'
+
+        mock_save_founded_certs.return_value = []
+
+        # Llamar a la función a probar
+        try:
+            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+        except Exception as e:
+            print(e)
+
+        # Comparar el resultado con lo esperado
+        self.assertEqual(res_certs, needed_certs)
+
+    @patch('app.data_process.save_founded_certs')
+    def test_basic_process_img_18(self, mock_save_founded_certs):
+        res_certs = ['S&P Global']
+        data_type = 'img'
+        img_for_test = 'spglobal.png'
+
+        mock_save_founded_certs.return_value = []
+
+        # Llamar a la función a probar
+        try:
+            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+        except Exception as e:
+            print(e)
+
+        # Comparar el resultado con lo esperado
+        self.assertEqual(res_certs, needed_certs)
+
+    @patch('app.data_process.save_founded_certs')
+    def test_basic_process_img_19(self, mock_save_founded_certs):
+        res_certs = []
+        data_type = 'img'
+        img_for_test = 'false_1.png'
+
+        mock_save_founded_certs.return_value = []
+
+        # Llamar a la función a probar
+        try:
+            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+        except Exception as e:
+            print(e)
+
+        # Comparar el resultado con lo esperado
+        self.assertEqual(res_certs, needed_certs)
+
+    @patch('app.data_process.save_founded_certs')
+    def test_basic_process_img_20(self, mock_save_founded_certs):
+        res_certs = []
+        data_type = 'img'
+        img_for_test = 'nave.jpg'
+
+        mock_save_founded_certs.return_value = []
+
+        # Llamar a la función a probar
+        try:
+            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+        except Exception as e:
+            print(e)
+
+        # Comparar el resultado con lo esperado
+        self.assertEqual(res_certs, needed_certs)
+
+    @patch('app.data_process.save_founded_certs')
     def test_basic_process_pdf1(self, mock_save_founded_certs):
         res_certs = []
         data_type = 'doc'

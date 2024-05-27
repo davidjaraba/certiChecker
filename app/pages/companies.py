@@ -67,7 +67,10 @@ def main():
 
         if company['companycertificates']:
             st.markdown(f"### Certificados encontrados {len(company['companycertificates'])}")
-            for cert in company['companycertificates']:
+            sorted_certificates = sorted(company['companycertificates'],
+                                         key=lambda cert: cert.get('certificate', {}).get('name',
+                                                                                          'Unknown Certificate'))
+            for cert in sorted_certificates:
                 # Asumimos que cada 'cert' es un diccionario con 'certificate_name' y 'url'
                 cert_data = cert.get('certificate', 'Unknown Certificate')
                 cert_name = cert_data.get('name', 'Unknown Certificate')

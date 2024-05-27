@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 
 import streamlit as st
 import pandas as pd
@@ -36,7 +37,10 @@ def main():
     if resource:
         st.title(data_cert.get('name'))
 
-        st.text('Encontrado el ' + certificate.get('found_date'))
+        found_date = datetime.strptime(certificate.get('found_date'), '%Y-%m-%dT%H:%M:%S.%f')
+        formatted_date = found_date.strftime('%d/%m/%Y %H:%M')
+
+        st.text('Encontrado el ' + formatted_date)
 
         full_url = resource.get('full_url')
         st.markdown(f'<a href="{full_url}" target="_blank">Encontrado en la URL</a>', unsafe_allow_html=True)
