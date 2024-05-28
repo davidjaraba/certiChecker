@@ -1,15 +1,18 @@
 import io
 import json
 import os
+import re
 import sys
 import time
+
+import numpy as np
 import pika
 import logging
 import requests
 import fitz
 import cv2
 
-from PIL import Image, ImageFile, UnidentifiedImageError, ImageEnhance
+from PIL import Image, ImageFile, UnidentifiedImageError, ImageEnhance, ImageOps
 from langdetect import detect, detect_langs
 import spacy
 
@@ -109,14 +112,19 @@ def extract_text(image_src):
     text = ''
 
     try:
-        image = Image.open(image_src)
+        # image = Image.open(image_src)
 
-        try:
-            text += get_circular_text_from_img(image_src)
-        except Exception as e:
-            print(e)
+        # try:
+        # text += get_circular_text_from_img(image_src)
+        # except Exception as e:
+        #     print(e)
 
         # Uso de Tesseract con configuraciones mejoradas
+
+        # Abre la imagen
+        # image = Image.open(image_src)
+        image = Image.open(image_src)
+
         custom_config = f'--oem 3 --psm 6 -c tessedit_char_whitelist="{whitelist_chars}"'
         text += pytesseract.image_to_string(image, lang='eng', config=custom_config)
 
@@ -140,7 +148,7 @@ def extract_text_from_pdf(src, certs):
         return
 
     for page_num in range(pdf_document.page_count):
-        print(f'Procesando pagina '+str(page_num))
+        print(f'Procesando pagina ' + str(page_num))
         try:
             page = pdf_document.load_page(page_num)
 
@@ -160,9 +168,11 @@ def extract_text_from_pdf(src, certs):
                         image_ext = base_image["ext"]
 
                         # Verificar si los bytes extraídos son una imagen válida
-                        image = Image.open(io.BytesIO(image_bytes))
+                        # image = Image.open(io.BytesIO(image_bytes))
+                        #
+                        # image_text = pytesseract.image_to_string(image, lang='eng')
 
-                        image_text = pytesseract.image_to_string(image, lang='eng')
+                        image_text = extract_text(io.BytesIO(image_bytes))
 
                         logging.debug('TEXTO ENCONTRADO EN PDF ')
                         logging.debug(image_text)
@@ -194,7 +204,7 @@ def basic_process(data_src, data_type, url, origin_url, certs):
 
     umbral = 82
 
-    print('Certificados encontrados: '+ data_src)
+    print('Certificados encontrados: ' + data_src)
     print(list(found_certs))
 
     match data_type:
@@ -208,7 +218,7 @@ def basic_process(data_src, data_type, url, origin_url, certs):
             umbral = 85
             text = extract_text(data_src)
 
-        case 'doca':
+        case 'doc':
             nlp = True
             _, file_extension = os.path.splitext(data_src)
 
@@ -219,7 +229,6 @@ def basic_process(data_src, data_type, url, origin_url, certs):
                     for ex_cert in ex_certs:
                         found_certs.add(ex_cert)
 
-
                 # if text_from_image:
                 #     certs_into_images = find_certs_in_text(text_from_image, certs, False)
                 #
@@ -229,8 +238,6 @@ def basic_process(data_src, data_type, url, origin_url, certs):
         case _:
             logging.debug(f'Unsupported data type: {data_type}')
 
-
-
     found_and_filtered_certs = []
 
     if text:
@@ -239,7 +246,6 @@ def basic_process(data_src, data_type, url, origin_url, certs):
         if ex_certs is not None:
             for ex_cert in ex_certs:
                 found_certs.add(ex_cert)
-
 
     if found_certs:
         try:
@@ -306,8 +312,6 @@ def callback(ch, method, properties, body):
     print(f"Tiempo transcurrido en basic_process: {elapsed_time:.2f} segundos")
 
 
-
-
 def consume_messages(queue='default'):
     while True:
         try:
@@ -349,7 +353,7 @@ def unique_characters(strings):
 
 
 def find_certs_in_text(text, certs, use_nlp, umbral=82):
-    print('[*] Finding certs... '+str(use_nlp))
+    print('[*] Finding certs... ' + str(use_nlp))
 
     found_certs = []
 
@@ -373,38 +377,76 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
             else:
                 nlp = spacy.load("en_core_web_sm")
 
-            nlp.max_length = 20000000
+            nlp.max_length = 1500000
 
             # Procesar el texto
             doc = nlp(text)
 
             found_certs = [ent.text for ent in doc.ents if ent.text in certs]
 
-            # print(found_certs)
         else:
-            text = text.replace('\n', ' ').replace('\r', '').replace(' ', '')
-            # print(text)
+            text = re.sub(r'\s+', '', text)
+
             best_cert_score = 0
             best_cert = None
+            words = []
+            for word in text.split():
+                if len(word) > 3:
+                    print(f"Adding word: {word.lower()}")
+                    words.append(word.lower())
+
+            print(words)
+
             for cert in certs:
-                matches = process.extract(cert.lower().replace(' ', ''), [word.lower() for word in text.split() if len(word) > 4],
-                                          limit=1,
-                                          scorer=fuzz.partial_ratio)
-                # matches = process.extract(cert, text, limit=2)
+                cert_keywords = [word.lower() for word in cert.split() if len(word) >= 3]
+                matches = [process.extract(keyword, words, limit=1, scorer=fuzz.partial_ratio) for keyword in
+                           cert_keywords]
+
+                total_score = 0
                 for match in matches:
-                    # print(cert + ' ' + str(match[1]))
-                    if match[1] >= umbral and match[
-                        1] > best_cert_score:  # 75 es un umbral de similitud, puedes ajustarlo según sea necesario
-                        best_cert_score = match[1]
+                    if match and match[0]:  # Ensure match is not empty and match[0] exists
+                        total_score += match[0][1]
+
+                # Calculate the average score
+                if len(cert_keywords) > 0:
+                    avg_score = total_score / len(cert_keywords)
+
+                    print(f'{cert} {avg_score}')
+                    # Update the best certificate if conditions are met
+                    if avg_score >= umbral and avg_score > best_cert_score:
+                        best_cert_score = avg_score
                         best_cert = cert
 
-            if best_cert is not None:
-                found_certs.append(best_cert)
+
+                if best_cert:
+                    found_certs.append(best_cert)
+
+
+
+
+            # text = text.replace('\n', ' ').replace('\r', '').replace(' ', '')
+            # # print(text)
+            # best_cert_score = 0
+            # best_cert = None
+            # for cert in certs:
+            #     matches = process.extract(cert.lower().replace(' ', ''),
+            #                               [word.lower() for word in text.split() if len(word) > 4],
+            #                               limit=1,
+            #                               scorer=fuzz.partial_ratio)
+            #     # matches = process.extract(cert, text, limit=2)
+            #     for match in matches:
+            #         print(cert + ' ' + str(match[1]))
+            #         if match[1] >= umbral and match[
+            #             1] > best_cert_score:  # 75 es un umbral de similitud, puedes ajustarlo según sea necesario
+            #             best_cert_score = match[1]
+            #             best_cert = cert
+            #
+            # if best_cert is not None:
+            #     found_certs.append(best_cert)
 
         print(found_certs)
 
     return found_certs
-
 
 
 if __name__ == "__main__":

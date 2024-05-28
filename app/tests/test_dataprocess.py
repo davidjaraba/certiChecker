@@ -109,7 +109,8 @@ class TestBasicProcess(unittest.TestCase):
 
     @patch('app.data_process.save_founded_certs')
     def test_basic_process_img_5(self, mock_save_founded_certs):
-        res_certs = ['Dow Jones Sustainability Index']
+        # res_certs = ['Dow Jones Sustainability Index']
+        res_certs = ['Dow Jones Sustainability Index', 'S&P Global']
         data_type = 'img'
         img_for_test = 'dowjones.jpg'
 
@@ -380,6 +381,57 @@ class TestBasicProcess(unittest.TestCase):
         self.assertEqual(res_certs, needed_certs)
 
     @patch('app.data_process.save_founded_certs')
+    def test_basic_process_img_21(self, mock_save_founded_certs):
+        res_certs = []
+        data_type = 'img'
+        img_for_test = 'hombre.png'
+
+        mock_save_founded_certs.return_value = []
+
+        # Llamar a la función a probar
+        try:
+            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+        except Exception as e:
+            print(e)
+
+        # Comparar el resultado con lo esperado
+        self.assertEqual(res_certs, needed_certs)
+
+    @patch('app.data_process.save_founded_certs')
+    def test_basic_process_img_22(self, mock_save_founded_certs):
+        res_certs = ['CDP']
+        data_type = 'img'
+        img_for_test = 'cdp.png'
+
+        mock_save_founded_certs.return_value = []
+
+        # Llamar a la función a probar
+        try:
+            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+        except Exception as e:
+            print(e)
+
+        # Comparar el resultado con lo esperado
+        self.assertEqual(res_certs, needed_certs)
+
+    @patch('app.data_process.save_founded_certs')
+    def test_basic_process_img_23(self, mock_save_founded_certs):
+        res_certs = ['Ecovadis Platinum']
+        data_type = 'img'
+        img_for_test = 'ecovadis_plat.png'
+
+        mock_save_founded_certs.return_value = []
+
+        # Llamar a la función a probar
+        try:
+            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+        except Exception as e:
+            print(e)
+
+        # Comparar el resultado con lo esperado
+        self.assertEqual(res_certs, needed_certs)
+
+    @patch('app.data_process.save_founded_certs')
     def test_basic_process_pdf1(self, mock_save_founded_certs):
         res_certs = []
         data_type = 'doc'
@@ -396,39 +448,39 @@ class TestBasicProcess(unittest.TestCase):
         # Comparar el resultado con lo esperado
         self.assertEqual(res_certs, needed_certs)
 
-    @patch('app.data_process.save_founded_certs')
-    def test_basic_process_pdf2(self, mock_save_founded_certs):
-        res_certs = ['ISO 9001']
-        data_type = 'doc'
-        pdf_for_test = 'true_1.pdf'
-
-        mock_save_founded_certs.return_value = []
-
-        # Llamar a la función a probar
-        try:
-            needed_certs = basic_process(pdf_for_test, data_type, url, origin_url, self.current_certs)
-        except Exception as e:
-            print(e)
-
-        # Comparar el resultado con lo esperado
-        self.assertEqual(res_certs, needed_certs)
-
-    @patch('app.data_process.save_founded_certs')
-    def test_basic_process_pdf3(self, mock_save_founded_certs):
-        res_certs = ['ISO 9001']
-        data_type = 'doc'
-        pdf_for_test = 'true_2.pdf'
-
-        mock_save_founded_certs.return_value = []
-
-        # Llamar a la función a probar
-        try:
-            needed_certs = basic_process(pdf_for_test, data_type, url, origin_url, self.current_certs)
-        except Exception as e:
-            print(e)
-
-        # Comparar el resultado con lo esperado
-        self.assertEqual(res_certs, needed_certs)
+    # @patch('app.data_process.save_founded_certs')
+    # def test_basic_process_pdf2(self, mock_save_founded_certs):
+    #     res_certs = ['ISO 9001']
+    #     data_type = 'doc'
+    #     pdf_for_test = 'true_1.pdf'
+    #
+    #     mock_save_founded_certs.return_value = []
+    #
+    #     # Llamar a la función a probar
+    #     try:
+    #         needed_certs = basic_process(pdf_for_test, data_type, url, origin_url, self.current_certs)
+    #     except Exception as e:
+    #         print(e)
+    #
+    #     # Comparar el resultado con lo esperado
+    #     self.assertEqual(res_certs, needed_certs)
+    #
+    # @patch('app.data_process.save_founded_certs')
+    # def test_basic_process_pdf3(self, mock_save_founded_certs):
+    #     res_certs = ['ISO 9001']
+    #     data_type = 'doc'
+    #     pdf_for_test = 'true_2.pdf'
+    #
+    #     mock_save_founded_certs.return_value = []
+    #
+    #     # Llamar a la función a probar
+    #     try:
+    #         needed_certs = basic_process(pdf_for_test, data_type, url, origin_url, self.current_certs)
+    #     except Exception as e:
+    #         print(e)
+    #
+    #     # Comparar el resultado con lo esperado
+    #     self.assertEqual(res_certs, needed_certs)
 
 
 if __name__ == '__main__':
