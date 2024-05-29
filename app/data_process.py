@@ -379,10 +379,8 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
             else:
                 nlp = spacy.load("en_core_web_sm")
 
-            nlp.max_length = 1500000
-
             # Procesar el texto
-            nlp.max_length = 1500000
+            nlp.max_length = 1200000
 
             # Check if text exceeds the maximum length and split if necessary
             if len(text) > nlp.max_length:
@@ -406,7 +404,7 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
             words = []
             for word in text.split():
                 if len(word) >= 3:
-                    print(f"Adding word: {word.lower()}")
+                    # print(f"Adding word: {word.lower()}")
                     words.append(word.lower())
 
             for cert in certs:
