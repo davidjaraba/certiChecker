@@ -162,3 +162,6 @@ class Tests(TestCase):
         mock_get_certificate.assert_called_once()
 
         assert response.status_code == 404
+
+
+    

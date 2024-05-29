@@ -1,4 +1,7 @@
+from sqlalchemy.orm import joinedload
+
 from app.models.models import Company as CompanyDBModel
+from app.models.models import CompanyCertificate as CompanyCertificateDBModel
 from app.models.models import URL as URLDBModel
 from app.schemas.company import CreateCompanyDto, UpdateCompanyDto
 from fastapi import HTTPException, Response
@@ -6,11 +9,31 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def get_company(db_session: AsyncSession, cert_id: int):
-    cert = (await db_session.scalars(select(CompanyDBModel).where(CompanyDBModel.id == cert_id))).first()
+async def get_company(db_session: AsyncSession, cert_id: int, last_certs: bool):
+    query = select(CompanyDBModel).options(joinedload(CompanyDBModel.companycertificates)
+                                           .joinedload(CompanyCertificateDBModel.certificate)).where(
+        CompanyDBModel.id == cert_id)
+    result = await db_session.scalars(query)
+    cert = result.first()
 
     if not cert:
         return Response(status_code=404, content="Company not found")
+
+    if last_certs:
+        unique_certificates = {}
+        filtered_certificates = []
+
+        # Sort companycertificates by found_date in descending order
+        sorted_certificates = sorted(cert.companycertificates, key=lambda x: x.found_date, reverse=True)
+
+        for company_certificate in sorted_certificates:
+            certificate_id = company_certificate.certificate.id
+            if certificate_id not in unique_certificates:
+                unique_certificates[certificate_id] = company_certificate
+                filtered_certificates.append(company_certificate)
+
+        cert.companycertificates = filtered_certificates
+
     return cert
 
 

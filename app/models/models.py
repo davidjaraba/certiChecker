@@ -26,7 +26,7 @@ class Company(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self) -> str:
-        return f"Company(id={self.id!r}, name={self.name!r}"
+        return f"Company(id={self.id!r}, name={self.name!r}, urls={self.urls!r})"
 
 
 class Certificate(Base):
@@ -55,6 +55,7 @@ class Resource(Base):
     __tablename__ = 'resources'
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     type: Mapped[str] = mapped_column(String(), nullable=False)
+    full_url: Mapped[str] = mapped_column(String(255), nullable=False)
     url_id: Mapped[str] = mapped_column(ForeignKey('urls.url'), nullable=False)
     url: Mapped[URL] = relationship(back_populates="resources")
     certificate: Mapped["CompanyCertificate"] = relationship(back_populates="resource")
@@ -78,3 +79,6 @@ class CompanyCertificate(Base):
 
     resource_id: Mapped[str] = mapped_column(ForeignKey('resources.id'))
     resource: Mapped[Resource] = relationship(back_populates='certificate')
+
+    def __repr__(self) -> str:
+        return f"CompanyCertificate(company_id={self.company_id}, certificate_name={self.certificate.certificate_name if self.certificate else 'Unknown'}, found_date={self.found_date}, resource_id={self.resource_id})"

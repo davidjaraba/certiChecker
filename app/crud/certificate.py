@@ -1,3 +1,5 @@
+from typing import Optional
+
 from app.models.models import Certificate as CertificateDBModel
 from app.schemas.certificate import CreateCertificateDto, UpdateCertificateDto
 from sqlalchemy import select
@@ -13,8 +15,12 @@ async def get_certificate(db_session: AsyncSession, cert_id: int):
     return cert
 
 
-async def get_certificates(db_session: AsyncSession):
-    return (await db_session.scalars(select(CertificateDBModel))).fetchall()
+async def get_certificates(db_session: AsyncSession, name: Optional[str] = None):
+    query = select(CertificateDBModel)
+    if name:
+        query = query.where(CertificateDBModel.name.ilike(f"%{name}%"))
+    result = await db_session.execute(query)
+    return result.scalars().all()
 
 
 async def create_certificate(db_session: AsyncSession, create_certificate: CreateCertificateDto):

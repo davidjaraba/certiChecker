@@ -5,20 +5,23 @@ import sys
 import ssl
 from contextlib import asynccontextmanager
 from multiprocessing import Queue, Process
+# from text_extract import extract
 
 import uvicorn
 
 from fastapi import FastAPI, APIRouter
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from webscrapper import test
-
 from app.api.routers.certificates import router as certificates_router
-from app.api.routers.companies import router as companies_router
+from app.api.routers.companies import CompaniesAPI
 from app.api.routers.urls import router as urls_router
 from app.api.routers.resources import router as resources_router
 
+from scrap_queue import get_webscrap_queue
+
 from home import Home
+
+from consumer import consumer_handler, add_url_to_queue
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -27,7 +30,7 @@ from database import sessionmanager
 from models.models import Base
 
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG if settings.log_level == "DEBUG" else logging.INFO)
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
 
 
 # engine = create_async_engine('sqlite+aiosqlite:///base.db')
@@ -45,46 +48,20 @@ async def lifespan(app: FastAPI):
         await sessionmanager.close()
 
 
-app = FastAPI(lifespan=lifespan, title="ssss", docs_url="/api/docs", debug=True)
-
-# CORS Allow all
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# @app.get("/")
-# async def root():
-#     webscrap_queue.put('SDASSD')
-#     return {"message": "Hello World"}
+from multiprocessing import Queue
 
 
 class Test:
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, queue: Queue):
         self.name = name
+        self.queue = queue
         self.router = APIRouter()
         self.router.add_api_route("/hello", self.hello, methods=["GET"])
 
     def hello(self):
-        res = test.delay(2, 7)
-        print('Esperando el resultado...')
-        print('Resultado:', res.result)
+        add_url_to_queue(self.queue, self.name)
         return {"Hello": self.name}
-
-
-test_app = Test("test", )
-app.include_router(test_app.router)
-
-# Routers
-app.include_router(certificates_router)
-app.include_router(companies_router)
-app.include_router(urls_router)
-app.include_router(resources_router)
 
 
 async def async_main() -> None:
@@ -94,9 +71,36 @@ async def async_main() -> None:
 
 
 if __name__ == "__main__":
-    test.delay(4, 6)
+    app = FastAPI(lifespan=lifespan, title="ssss", docs_url="/api/docs", debug=True)
+
+    # CORS Allow all
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # _webscrap_queue = Queue()
+    manager = multiprocessing.Manager()
+    _webscrap_queue = manager.Queue()
+
+    consumer_process = Process(target=consumer_handler, args=(_webscrap_queue,))
+    consumer_process.start()
+
+    test = Test("test", _webscrap_queue)
+
+    companies = CompaniesAPI(_webscrap_queue)
+
+    app.include_router(test.router)
+    app.include_router(certificates_router)
+    app.include_router(companies.router)
+    app.include_router(urls_router)
+    app.include_router(resources_router)
+
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ssl_context.load_cert_chain('./cert/cert.pem', keyfile='./cert/key.pem')
     print("Inicializando API REST")
     asyncio.run(async_main())
-    uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)
+    uvicorn.run(app, host="0.0.0.0", reload=False, port=8000)
