@@ -177,7 +177,7 @@ def extract_text_from_pdf(src, certs):
                         logging.debug('TEXTO ENCONTRADO EN PDF ')
                         logging.debug(image_text)
 
-                        found_certs += find_certs_in_text(image_text, certs, False, 85)
+                        found_certs += find_certs_in_text(image_text, certs, False, 90)
 
                 except UnidentifiedImageError:
                     logging.debug(
@@ -215,7 +215,7 @@ def basic_process(data_src, data_type, url, origin_url, certs):
                 text = file.read()
 
         case 'img':
-            umbral = 85
+            umbral = 90
             text = extract_text(data_src)
 
         case 'doc':
@@ -352,12 +352,14 @@ def unique_characters(strings):
     return ''.join(sorted_chars)
 
 
+def split_text(text, max_length):
+    return [text[i:i + max_length] for i in range(0, len(text), max_length)]
+
+
 def find_certs_in_text(text, certs, use_nlp, umbral=82):
     print('[*] Finding certs... ' + str(use_nlp))
 
     found_certs = []
-
-    print(text)
 
     if text:
         if use_nlp:
@@ -380,49 +382,62 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
             nlp.max_length = 1500000
 
             # Procesar el texto
-            doc = nlp(text)
+            nlp.max_length = 1500000
 
-            found_certs = [ent.text for ent in doc.ents if ent.text in certs]
+            # Check if text exceeds the maximum length and split if necessary
+            if len(text) > nlp.max_length:
+                chunks = split_text(text, nlp.max_length)
+                docs = [nlp(chunk) for chunk in chunks]
+                # Combine results
+                found_certs = [ent.text for doc in docs for ent in doc.ents if ent.text in certs]
+            else:
+                doc = nlp(text)
+                found_certs = [ent.text for ent in doc.ents if ent.text in certs]
+
+            # doc = nlp(text)
+            #
+            # found_certs = [ent.text for ent in doc.ents if ent.text in certs]
 
         else:
-            text = re.sub(r'\s+', '', text)
+            text = re.sub(r'\s+', ' ', text)
 
             best_cert_score = 0
             best_cert = None
             words = []
             for word in text.split():
-                if len(word) > 3:
+                if len(word) >= 3:
                     print(f"Adding word: {word.lower()}")
                     words.append(word.lower())
 
-            print(words)
-
             for cert in certs:
                 cert_keywords = [word.lower() for word in cert.split() if len(word) >= 3]
-                matches = [process.extract(keyword, words, limit=1, scorer=fuzz.partial_ratio) for keyword in
-                           cert_keywords]
-
+                # matches = [process.extract(keyword, words, limit=1, scorer=fuzz.token_sort_ratio) for keyword in
+                #            cert_keywords]
                 total_score = 0
-                for match in matches:
-                    if match and match[0]:  # Ensure match is not empty and match[0] exists
-                        total_score += match[0][1]
+                for keyword in cert_keywords:
+                    match = process.extractOne(keyword, words, scorer=fuzz.token_set_ratio)
+                    if match:  # Ensure match is not empty
+                        total_score += match[1]
+
+                # print(matches)
+                # print(cert_keywords)
+
+                # for match in matches:
+                #     if match and match[0]:  # Ensure match is not empty and match[0] exists
+                #         total_score += match[0][1]
 
                 # Calculate the average score
                 if len(cert_keywords) > 0:
                     avg_score = total_score / len(cert_keywords)
 
-                    print(f'{cert} {avg_score}')
+                    logging.debug(f'{cert} {avg_score}')
                     # Update the best certificate if conditions are met
                     if avg_score >= umbral and avg_score > best_cert_score:
                         best_cert_score = avg_score
                         best_cert = cert
 
-
                 if best_cert:
                     found_certs.append(best_cert)
-
-
-
 
             # text = text.replace('\n', ' ').replace('\r', '').replace(' ', '')
             # # print(text)

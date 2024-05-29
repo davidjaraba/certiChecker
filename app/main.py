@@ -48,11 +48,6 @@ async def lifespan(app: FastAPI):
         await sessionmanager.close()
 
 
-# @app.get("/")
-# async def root():
-#     webscrap_queue.put('SDASSD')
-#     return {"message": "Hello World"}
-
 from multiprocessing import Queue
 
 
@@ -76,7 +71,6 @@ async def async_main() -> None:
 
 
 if __name__ == "__main__":
-    # queue = get_webscrap_queue()
     app = FastAPI(lifespan=lifespan, title="ssss", docs_url="/api/docs", debug=True)
 
     # CORS Allow all
@@ -104,9 +98,6 @@ if __name__ == "__main__":
     app.include_router(companies.router)
     app.include_router(urls_router)
     app.include_router(resources_router)
-
-    # add_url_to_queue(_webscrap_queue, 'EOOEOEOE')
-    # add_url_to_queue(_webscrap_queue, '22222')
 
     ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ssl_context.load_cert_chain('./cert/cert.pem', keyfile='./cert/key.pem')

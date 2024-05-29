@@ -43,7 +43,10 @@ def main():
         st.text('Encontrado el ' + formatted_date)
 
         full_url = resource.get('full_url')
-        st.markdown(f'<a href="{full_url}" target="_blank">Encontrado en la URL</a>', unsafe_allow_html=True)
+
+        st.text('Encontrado en la URL: ')
+
+        st.markdown(f'<a target="_blank">{full_url}</a>', unsafe_allow_html=True)
 
         data_type = resource['type']
         path_file = resource['path_file']
@@ -53,8 +56,6 @@ def main():
                 # Abre y lee el contenido del archivo de texto
                 with open('app/' + path_file, 'r', encoding='utf-8') as file:
                     content = file.read()
-
-                # st.text_area('Encontrado en', content, height=500, disabled=True)
 
                 # Resalta las palabras clave en el contenido (por ejemplo, "importante")
                 highlighted_content = content.replace(data_cert.get('name'), f'<span style="background-color: yellow; '
@@ -74,19 +75,30 @@ def main():
             except Exception as e:
                 st.error(f"Error al abrir la imagen: {e}")
 
-
         elif data_type == 'DOC':
+
             with open('app/' + path_file, "rb") as f:
+
                 pdf_data = f.read()
 
             # Convertir el archivo PDF a base64
+
             base64_pdf = base64.b64encode(pdf_data).decode('utf-8')
 
-            # Mostrar el PDF usando HTML
+            # Crear un enlace de descarga
+
+            href = f'<a href="data:application/octet-stream;base64,{base64_pdf}" download="document.pdf">Descargar PDF</a>'
+
+            # Mostrar el PDF usando HTML y el enlace de descarga
+
             st.markdown(f"""
-                <iframe src="data:application/pdf;base64,{base64_pdf}" 
-                        width="1100" height="1200" type="application/pdf"></iframe>
-                """, unsafe_allow_html=True)
+                {href}
+                <br>
+                
+                <iframe src="data:application/pdf;base64,{base64_pdf}" width="1100" height="1200" 
+                type="application/pdf"></iframe>
+
+            """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
