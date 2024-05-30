@@ -1,6 +1,7 @@
 import io
 import json
 import os
+import platform
 import re
 import sys
 import time
@@ -33,15 +34,24 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 logging.getLogger("pika").setLevel(logging.WARNING)
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\T031105\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = ''
 
 certs_to_find = []
 
 whitelist_chars = " &'(),-.0123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ­ÁÂÍÏÑÓáâíïñó"
 
 
+def set_tesseract():
+    if platform.system() == 'Windows':
+        pytesseract.pytesseract.tesseract_cmd = r'C:\Users\T031105\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+    else:
+        pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH', '/usr/bin/tesseract')
+
+
 def get_circular_text_from_img(img_src):
     found_text = ''
+
+    set_tesseract()
 
     # Read image
     img = cv2.imread(img_src)
@@ -106,6 +116,8 @@ def get_circular_text_from_img(img_src):
 
 def extract_text(image_src):
     text = ''
+
+    set_tesseract()
 
     try:
         # image = Image.open(image_src)
