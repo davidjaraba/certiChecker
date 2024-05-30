@@ -43,3 +43,13 @@ jobs:
         TESSERACT_PATH: /usr/bin/tesseract
       run: |
         pytest
+
+    - name: Copy files via SSH
+    - uses: appleboy/scp-action@v0.1.1
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}  # opcional, por defecto es 22
+        source: "."
+        target: "/home/ubuntu/certiChecker"
