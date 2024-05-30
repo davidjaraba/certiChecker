@@ -44,8 +44,8 @@ jobs:
       run: |
         pytest
 
-    - name: Copy files via SSH
     - uses: appleboy/scp-action@v0.1.1
+    - name: Copy files via SSH
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
