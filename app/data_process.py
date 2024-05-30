@@ -137,6 +137,7 @@ def extract_text(image_src):
         except Exception as e:
             print(e)
 
+        print(text)
         logging.debug(text)
 
         return text.strip()
