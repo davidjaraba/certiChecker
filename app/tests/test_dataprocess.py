@@ -1,3 +1,5 @@
+import os
+import subprocess
 import unittest
 from unittest.mock import patch
 from openpyxl.reader.excel import load_workbook
@@ -9,6 +11,14 @@ origin_url = 'www.acciona.com'
 
 class TestBasicProcess(unittest.TestCase):
     def setUp(self):
+
+        # Print current working directory
+        print(f"Current working directory: {os.getcwd()}")
+
+        # List the contents of the current working directory
+        print("Contents of the current directory:")
+        print(subprocess.run(["ls", "-l"], capture_output=True, text=True).stdout)
+
         certs = []
         wb = load_workbook('Glosario_Certificaciones.xlsx')
         sheet = wb.active
