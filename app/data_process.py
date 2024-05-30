@@ -133,10 +133,7 @@ def extract_text(image_src):
         image = Image.open(image_src)
 
         custom_config = f'--oem 3 --psm 6 -c tessedit_char_whitelist="{whitelist_chars}"'
-        try:
-            text += pytesseract.image_to_string(image, lang='eng', config=custom_config)
-        except Exception as e:
-            print(e)
+        text += pytesseract.image_to_string(image, lang='eng', config=custom_config)
 
         print(text)
         logging.debug(text)
@@ -144,6 +141,7 @@ def extract_text(image_src):
         return text.strip()
 
     except Exception as e:
+        print(e)
         logging.debug(str(e))
         logging.debug(f"Ocurrió un error inesperado: {str(e)}")
 
