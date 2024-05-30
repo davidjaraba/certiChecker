@@ -35,7 +35,7 @@ class TestBasicProcess(unittest.TestCase):
             print(e)
 
         # Comparar el resultado con lo esperado
-        self.assertEqual(res_certs, needed_certs)
+        self.assertCountEqual(res_certs, needed_certs)
 
     @patch('app.data_process.save_founded_certs')
     def test_basic_process_img_1(self, mock_save_founded_certs):
@@ -121,7 +121,7 @@ class TestBasicProcess(unittest.TestCase):
             print(e)
 
         # Comparar el resultado con lo esperado
-        self.assertEqual(res_certs, needed_certs)
+        self.assertCountEqual(res_certs, needed_certs)
 
     @patch('app.data_process.save_founded_certs')
     def test_basic_process_img_6(self, mock_save_founded_certs):

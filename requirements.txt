@@ -20,5 +20,4 @@ fuzzywuzzy~=0.18.0
 pytest~=8.1.1
 pydantic_settings~=2.2.1
 aiosqlite
-fitz
 httpx
