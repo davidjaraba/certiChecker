@@ -58,9 +58,10 @@ def main():
                     content = file.read()
 
                 # Resalta las palabras clave en el contenido (por ejemplo, "importante")
-                highlighted_content = content.replace(data_cert.get('name'), f'<span style="background-color: yellow; '
-                                                                             f'color: black;">{data_cert.get(
-                                                                                 'name')}</span>')
+                highlighted_content = content.replace(
+                    data_cert.get('name'),
+                    f'<span style="background-color: yellow; color: black;">{data_cert.get("name")}</span>'
+                )
 
                 # Muestra el contenido del archivo en Streamlit con el texto resaltado
                 st.markdown(f'<div style="height: 500px; overflow: auto;">{highlighted_content}</div>',
