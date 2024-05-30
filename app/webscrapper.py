@@ -1,10 +1,11 @@
-import base64, binascii
+import base64
+import logging
 import os
 from urllib.parse import urlparse, urljoin, urlunparse
-import logging
-from process_queue import send_task
 import requests
 from bs4 import BeautifulSoup
+
+from process_queue import send_task
 
 folder = 'resources'
 
