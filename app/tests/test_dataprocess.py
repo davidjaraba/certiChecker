@@ -1,8 +1,6 @@
 import unittest
-from unittest.mock import patch, Mock
-
+from unittest.mock import patch
 from openpyxl.reader.excel import load_workbook
-
 from app.data_process import basic_process
 
 url = 'https://raw.si.com'
