@@ -120,8 +120,6 @@ def extract_text(image_src):
     set_tesseract()
 
     try:
-        # image = Image.open(image_src)
-
         # try:
         # text += get_circular_text_from_img(image_src)
         # except Exception as e:

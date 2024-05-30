@@ -1,6 +1,8 @@
 import os
 import unittest
 from unittest.mock import patch
+
+import pytesseract
 from openpyxl.reader.excel import load_workbook
 from app.data_process import basic_process
 
@@ -10,6 +12,7 @@ origin_url = 'www.acciona.com'
 
 class TestBasicProcess(unittest.TestCase):
     def setUp(self):
+        print(pytesseract.pytesseract.tesseract_cmd)
 
         # Print current working directory
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
