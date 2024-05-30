@@ -1,7 +1,7 @@
 from app.api.dependencies.core import DBSessionDep
 from app.crud.resource import get_resource, get_resources, create_resource, delete_resource, update_resource
-from app.schemas.resource import CreateResourceDto, ResponseResourceDto, UpdateResourceDto
-from fastapi import APIRouter, Response, HTTPException
+from app.schemas.resource import CreateResourceDto, UpdateResourceDto
+from fastapi import APIRouter
 
 router = APIRouter(
     prefix="/api/resources",

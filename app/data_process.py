@@ -4,16 +4,14 @@ import os
 import re
 import sys
 import time
-
-import numpy as np
+import fitz
 import pika
 import logging
 import requests
-import fitz
 import cv2
 
-from PIL import Image, ImageFile, UnidentifiedImageError, ImageEnhance, ImageOps
-from langdetect import detect, detect_langs
+from PIL import Image, UnidentifiedImageError
+from langdetect import detect
 import spacy
 
 import pytesseract
@@ -36,8 +34,6 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger("pika").setLevel(logging.WARNING)
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\T031105\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
-
-# ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 certs_to_find = []
 
@@ -166,11 +162,6 @@ def extract_text_from_pdf(src, certs):
                     if base_image:
                         image_bytes = base_image["image"]
                         image_ext = base_image["ext"]
-
-                        # Verificar si los bytes extraídos son una imagen válida
-                        # image = Image.open(io.BytesIO(image_bytes))
-                        #
-                        # image_text = pytesseract.image_to_string(image, lang='eng')
 
                         image_text = extract_text(io.BytesIO(image_bytes))
 
@@ -392,10 +383,6 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
                 doc = nlp(text)
                 found_certs = [ent.text for ent in doc.ents if ent.text in certs]
 
-            # doc = nlp(text)
-            #
-            # found_certs = [ent.text for ent in doc.ents if ent.text in certs]
-
         else:
             text = re.sub(r'\s+', ' ', text)
 
@@ -417,13 +404,6 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
                     if match:  # Ensure match is not empty
                         total_score += match[1]
 
-                # print(matches)
-                # print(cert_keywords)
-
-                # for match in matches:
-                #     if match and match[0]:  # Ensure match is not empty and match[0] exists
-                #         total_score += match[0][1]
-
                 # Calculate the average score
                 if len(cert_keywords) > 0:
                     avg_score = total_score / len(cert_keywords)
@@ -436,26 +416,6 @@ def find_certs_in_text(text, certs, use_nlp, umbral=82):
 
                 if best_cert:
                     found_certs.append(best_cert)
-
-            # text = text.replace('\n', ' ').replace('\r', '').replace(' ', '')
-            # # print(text)
-            # best_cert_score = 0
-            # best_cert = None
-            # for cert in certs:
-            #     matches = process.extract(cert.lower().replace(' ', ''),
-            #                               [word.lower() for word in text.split() if len(word) > 4],
-            #                               limit=1,
-            #                               scorer=fuzz.partial_ratio)
-            #     # matches = process.extract(cert, text, limit=2)
-            #     for match in matches:
-            #         print(cert + ' ' + str(match[1]))
-            #         if match[1] >= umbral and match[
-            #             1] > best_cert_score:  # 75 es un umbral de similitud, puedes ajustarlo según sea necesario
-            #             best_cert_score = match[1]
-            #             best_cert = cert
-            #
-            # if best_cert is not None:
-            #     found_certs.append(best_cert)
 
         print(found_certs)
 

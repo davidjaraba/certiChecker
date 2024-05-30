@@ -1,18 +1,9 @@
 from unittest import TestCase
-
-import pytest
-import requests
-# from app.crud.certificate import get_certificate
-from unittest.mock import patch, MagicMock, AsyncMock
-
+from unittest.mock import patch
 from fastapi import Response
 from fastapi.exceptions import RequestValidationError
-
 from app.api.routers.certificates import router
-from app.crud.certificate import get_certificate
-
 from fastapi.testclient import TestClient
-from app.crud import certificate
 
 client = TestClient(router)
 

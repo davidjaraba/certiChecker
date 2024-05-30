@@ -1,9 +1,9 @@
 from typing import Optional
-
 from app.api.dependencies.core import DBSessionDep
-from app.crud.certificate import get_certificate, get_certificates, create_certificate, delete_certificate, update_certificate
-from app.schemas.certificate import CreateCertificateDto, ResponseCertificateDto, UpdateCertificateDto
-from fastapi import APIRouter, Response, HTTPException
+from app.crud.certificate import (get_certificate, get_certificates, create_certificate,
+                                  delete_certificate, update_certificate)
+from app.schemas.certificate import CreateCertificateDto, UpdateCertificateDto
+from fastapi import APIRouter
 
 router = APIRouter(
     prefix="/api/certificates",

@@ -4,28 +4,16 @@ import multiprocessing
 import sys
 import ssl
 from contextlib import asynccontextmanager
-from multiprocessing import Queue, Process
-# from text_extract import extract
-
+from multiprocessing import Process
 import uvicorn
 
 from fastapi import FastAPI, APIRouter
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from app.api.routers.certificates import router as certificates_router
 from app.api.routers.companies import CompaniesAPI
 from app.api.routers.urls import router as urls_router
 from app.api.routers.resources import router as resources_router
-
-from scrap_queue import get_webscrap_queue
-
-from home import Home
-
 from consumer import consumer_handler, add_url_to_queue
-
 from fastapi.middleware.cors import CORSMiddleware
-
-# from app.config import settings
 from database import sessionmanager
 from models.models import Base
 

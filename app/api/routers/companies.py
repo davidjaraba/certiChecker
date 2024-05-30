@@ -1,12 +1,10 @@
 from typing import Optional
-
 from starlette import status
-
 from app.api.dependencies.core import DBSessionDep
 from app.crud.company import get_company, get_companies, delete_company, update_company, create_company
 from app.consumer import add_url_to_queue
 from app.crud.url import get_urls_by_company_id
-from app.schemas.company import CreateCompanyDto, UpdateCompanyDto, ResponseCompanyDto
+from app.schemas.company import CreateCompanyDto, UpdateCompanyDto
 from fastapi import APIRouter
 
 

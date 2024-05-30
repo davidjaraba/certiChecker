@@ -2,8 +2,8 @@ from typing import Optional
 
 from app.api.dependencies.core import DBSessionDep
 from app.crud.url import get_url, get_urls, create_url, update_url, delete_url, get_urls_by_company_id
-from app.schemas.url import CreateURLDto, UpdateURLDto, ResponseURLDto
-from fastapi import APIRouter, Response, Query
+from app.schemas.url import CreateURLDto, UpdateURLDto
+from fastapi import APIRouter, Query
 
 router = APIRouter(
     prefix="/api/urls",
