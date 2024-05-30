@@ -22,3 +22,4 @@ pydantic_settings~=2.2.1
 aiosqlite
 httpx
 pymupdf
+python-Levenshtein

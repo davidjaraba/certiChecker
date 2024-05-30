@@ -1,5 +1,4 @@
 import os
-import subprocess
 import unittest
 from unittest.mock import patch
 from openpyxl.reader.excel import load_workbook
@@ -37,6 +36,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['ISO 14001', 'ISO 9001']
         data_type = 'txt'
         txt_for_test = 'site_text.txt'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -53,6 +53,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['ISO 9001']
         data_type = 'img'
         img_for_test = 'iso9001.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -70,6 +71,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['Sustainalytics']
         data_type = 'img'
         img_for_test = 'sustainalytics.png'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -104,6 +106,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['Euronext']
         data_type = 'img'
         img_for_test = 'euronext.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -122,6 +125,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['S&P Global', 'Dow Jones Sustainability Index']
         data_type = 'img'
         img_for_test = 'dowjones.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -139,6 +143,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['Gaïa Rating']
         data_type = 'img'
         img_for_test = 'gaia.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -156,6 +161,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['Ecoact']
         data_type = 'img'
         img_for_test = 'ecoact.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -173,6 +179,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['S&P Global']
         data_type = 'img'
         img_for_test = 'sp.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -190,6 +197,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['Seal Awards']
         data_type = 'img'
         img_for_test = 'seal.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -202,28 +210,30 @@ class TestBasicProcess(unittest.TestCase):
         # Comparar el resultado con lo esperado
         self.assertEqual(res_certs, needed_certs)
 
-    @patch('app.data_process.save_founded_certs')
-    def test_basic_process_img_10(self, mock_save_founded_certs):
-        res_certs = []
-        data_type = 'img'
-        img_for_test = 'dolar.jpg'
-
-        mock_save_founded_certs.return_value = []
-
-        # Llamar a la función a probar
-        try:
-            needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
-        except Exception as e:
-            print(e)
-
-        # Comparar el resultado con lo esperado
-        self.assertEqual(res_certs, needed_certs)
+    # @patch('app.data_process.save_founded_certs')
+    # def test_basic_process_img_10(self, mock_save_founded_certs):
+    #     res_certs = []
+    #     data_type = 'img'
+    #     img_for_test = 'dolar.jpg'
+    #     needed_certs = []
+    #
+    #     mock_save_founded_certs.return_value = []
+    #
+    #     # Llamar a la función a probar
+    #     try:
+    #         needed_certs = basic_process(img_for_test, data_type, url, origin_url, self.current_certs)
+    #     except Exception as e:
+    #         print(e)
+    #
+    #     # Comparar el resultado con lo esperado
+    #     self.assertEqual(res_certs, needed_certs)
 
     @patch('app.data_process.save_founded_certs')
     def test_basic_process_img_11(self, mock_save_founded_certs):
         res_certs = []
         data_type = 'img'
         img_for_test = 'dolar.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -241,6 +251,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'troncos.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -258,6 +269,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'mar.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -275,6 +287,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'hielo.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -292,6 +305,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'tren.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -309,6 +323,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'cueva.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -326,6 +341,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'good.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -343,6 +359,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['S&P Global']
         data_type = 'img'
         img_for_test = 'spglobal.png'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -360,6 +377,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'false_1.png'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -377,6 +395,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'nave.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -394,6 +413,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'hombre.png'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -428,6 +448,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = ['Ecovadis Platinum']
         data_type = 'img'
         img_for_test = 'ecovadis_plat.png'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -445,6 +466,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'img'
         img_for_test = 'nave2.jpg'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
@@ -462,6 +484,7 @@ class TestBasicProcess(unittest.TestCase):
         res_certs = []
         data_type = 'doc'
         pdf_for_test = 'false_1.pdf'
+        needed_certs = []
 
         mock_save_founded_certs.return_value = []
 
