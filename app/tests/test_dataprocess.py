@@ -12,8 +12,6 @@ origin_url = 'www.acciona.com'
 
 class TestBasicProcess(unittest.TestCase):
     def setUp(self):
-        print(pytesseract.pytesseract.tesseract_cmd)
-
         # Print current working directory
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         print(f"Project root directory: {project_root}")
@@ -41,6 +39,9 @@ class TestBasicProcess(unittest.TestCase):
         txt_for_test = 'site_text.txt'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        txt_for_test = os.path.join(project_root, txt_for_test)
+
         mock_save_founded_certs.return_value = []
 
         try:
@@ -57,6 +58,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'iso9001.jpg'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -75,6 +79,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'sustainalytics.png'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -111,6 +118,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'euronext.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -130,6 +140,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'dowjones.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -147,6 +160,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'gaia.jpg'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -166,6 +182,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'ecoact.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -183,6 +202,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'sp.jpg'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -202,6 +224,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'seal.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -219,6 +244,9 @@ class TestBasicProcess(unittest.TestCase):
     #     data_type = 'img'
     #     img_for_test = 'dolar.jpg'
     #     needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
     #
     #     mock_save_founded_certs.return_value = []
     #
@@ -238,6 +266,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'dolar.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -255,6 +286,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'troncos.jpg'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -274,6 +308,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'mar.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -291,6 +328,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'hielo.jpg'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -310,6 +350,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'tren.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -327,6 +370,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'cueva.jpg'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -346,6 +392,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'good.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -363,6 +412,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'spglobal.png'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -382,6 +434,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'false_1.png'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -400,6 +455,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'nave.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -417,6 +475,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'img'
         img_for_test = 'hombre.png'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
@@ -453,6 +514,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'ecovadis_plat.png'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -471,6 +535,9 @@ class TestBasicProcess(unittest.TestCase):
         img_for_test = 'nave2.jpg'
         needed_certs = []
 
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
+
         mock_save_founded_certs.return_value = []
 
         # Llamar a la función a probar
@@ -488,6 +555,9 @@ class TestBasicProcess(unittest.TestCase):
         data_type = 'doc'
         pdf_for_test = 'false_1.pdf'
         needed_certs = []
+
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
+        img_for_test = os.path.join(project_root, img_for_test)
 
         mock_save_founded_certs.return_value = []
 
