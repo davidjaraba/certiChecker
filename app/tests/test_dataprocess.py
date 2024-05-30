@@ -557,7 +557,7 @@ class TestBasicProcess(unittest.TestCase):
         needed_certs = []
 
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/tests'
-        img_for_test = os.path.join(project_root, img_for_test)
+        pdf_for_test = os.path.join(project_root, pdf_for_test)
 
         mock_save_founded_certs.return_value = []
 
