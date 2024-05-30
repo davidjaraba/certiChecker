@@ -13,14 +13,15 @@ class TestBasicProcess(unittest.TestCase):
     def setUp(self):
 
         # Print current working directory
-        print(f"Current working directory: {os.getcwd()}")
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        print(f"Project root directory: {project_root}")
 
-        # List the contents of the current working directory
-        print("Contents of the current directory:")
-        print(subprocess.run(["ls", "-l"], capture_output=True, text=True).stdout)
+        # Construct the path to the Excel file relative to the project root
+        file_path = os.path.join(project_root, 'tests/Glosario_Certificaciones.xlsx')
+        print(f"Excel file path: {file_path}")
 
         certs = []
-        wb = load_workbook('Glosario_Certificaciones.xlsx')
+        wb = load_workbook(file_path)
         sheet = wb.active
         # Leer todas las filas de la columna B y convertirlas en un array de certificados
         for row in sheet.iter_rows(min_row=2, min_col=2, max_col=2, values_only=True):
