@@ -115,6 +115,7 @@ def get_circular_text_from_img(img_src):
 
 
 def extract_text(image_src):
+    print('Extracting text')
     text = ''
 
     set_tesseract()
