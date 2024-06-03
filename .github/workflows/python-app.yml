@@ -57,9 +57,9 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}  # opcional, por defecto es 22
         script: |
-          mkdir -p /home/***/certiChecker
-          chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} /home/***/certiChecker
-          chmod -R 755 /home/***/certiChecker
+          mkdir -p /home/${{ secrets.SSH_USERNAME }}/certiChecker
+          chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} /home/${{ secrets.SSH_USERNAME }}/certiChecker
+          chmod -R 755 /home/${{ secrets.SSH_USERNAME }}/certiChecker
 
     - name: Copy files via SCP
       uses: appleboy/scp-action@v0.1.1
@@ -69,6 +69,6 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}  # Asegúrate de que este puerto sea el correcto. Si es 22, puedes omitir esta línea.
         source: "."
-        target: "/home/***/certiChecker"
+        target: "/home/${{ secrets.SSH_USERNAME }}/certiChecker"
         debug: true
 
