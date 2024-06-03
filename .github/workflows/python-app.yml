@@ -53,3 +53,4 @@ jobs:
         port: ${{ secrets.SSH_PORT }}  # opcional, por defecto es 22
         source: "."
         target: "/home/ubuntu/certiChecker"
+        debug: true
