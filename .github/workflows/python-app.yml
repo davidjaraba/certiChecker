@@ -44,13 +44,31 @@ jobs:
       run: |
         pytest
 
-    - name: Copy files via SSH
-      uses: appleboy/scp-action@v0.1.7
+    - name: Add SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Create remote directory
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}  # opcional, por defecto es 22
+        script: |
+          mkdir -p /home/***/certiChecker
+          chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} /home/***/certiChecker
+          chmod -R 755 /home/***/certiChecker
+
+    - name: Copy files via SCP
+      uses: appleboy/scp-action@v0.1.1
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}  # Asegúrate de que este puerto sea el correcto. Si es 22, puedes omitir esta línea.
         source: "."
-        target: "/home/ubuntu/certiChecker"
+        target: "/home/***/certiChecker"
         debug: true
+
