@@ -43,3 +43,48 @@ jobs:
         TESSERACT_PATH: /usr/bin/tesseract
       run: |
         pytest
+
+    - name: Add SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Create remote directory
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}  # opcional, por defecto es 22
+        script: |
+          mkdir -p /home/${{ secrets.SSH_USERNAME }}/certiChecker
+          chown -R ${{ secrets.SSH_USERNAME }}:${{ secrets.SSH_USERNAME }} /home/${{ secrets.SSH_USERNAME }}/certiChecker
+          chmod -R 755 /home/${{ secrets.SSH_USERNAME }}/certiChecker
+
+    - name: Copy files via SCP
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}  # Asegúrate de que este puerto sea el correcto. Si es 22, puedes omitir esta línea.
+        source: "."
+        target: "/home/${{ secrets.SSH_USERNAME }}/certiChecker"
+        debug: true
+
+    - name: Deploy to Server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SERVER_USER: ${{ secrets.SSH_USERNAME }}
+        SERVER_IP: ${{ secrets.SSH_HOST }}
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        ssh -i private_key -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
+          cd /home/ubuntu/certiChecker
+          python3 -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          sudo systemctl restart certicheckerapi.service
+        EOF
