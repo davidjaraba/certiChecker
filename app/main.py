@@ -87,8 +87,8 @@ if __name__ == "__main__":
     app.include_router(urls_router)
     app.include_router(resources_router)
 
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    ssl_context.load_cert_chain('./cert/cert.pem', keyfile='./cert/key.pem')
+    # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    # ssl_context.load_cert_chain('./cert/cert.pem', keyfile='./cert/key.pem')
     print("Inicializando API REST")
     asyncio.run(async_main())
     uvicorn.run(app, host="0.0.0.0", reload=False, port=8000)
