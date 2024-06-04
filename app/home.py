@@ -4,6 +4,7 @@ import requests
 
 API_URL = "http://localhost:8000/api"
 
+
 class Home:
     def __init__(self):
         st.title("CERTI Checker")
@@ -17,6 +18,7 @@ def list(ent):
     else:
         st.error(f'Error al obtener los {ent}')
         return []
+
 
 def main():
     st.set_page_config(
@@ -39,7 +41,8 @@ def main():
         df = pd.DataFrame(companies)
 
         # Crear una nueva columna en el DataFrame que formatea los nombres como enlaces HTML
-        df['link'] = df.apply(lambda row: f'<a href="companies/?id={row["id"]}" target="_blank">{row["name"]}</a>', axis=1)
+        df['link'] = df.apply(lambda row: f'<a href="companies/?id={row["id"]}" target="_blank">{row["name"]}</a>',
+                              axis=1)
 
         # Mostrar los nombres como enlaces clicables en Streamlit usando Markdown
         st.markdown("### Lista de Compañías")
