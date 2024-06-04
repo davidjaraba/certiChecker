@@ -51,7 +51,7 @@ def add_url_to_queue(queue, url: str, origin_url: str, depth=default_depth):
 def consumer_handler(queue):
     """Función consumidora que maneja los elementos de la cola."""
 
-    with Pool(processes=3) as pool:
+    with Pool(processes=1) as pool:
         while True:
             try:
                 print('Elementos actualmente en la cola =>>> '+str(queue.qsize()))
